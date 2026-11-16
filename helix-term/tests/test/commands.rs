@@ -1096,3 +1096,40 @@ async fn test_reflow_selections_in_one_paragraph() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[tokio::test(flavor = "multi_thread")]
+async fn buffer_lines_picker() -> anyhow::Result<()> {
+    // Lines of the buffer in memory are listed, including unsaved changes.
+    test((
+        indoc! {"\
+            #[o|]#ne
+            two
+            three
+            "},
+        "ofour<esc><space>lfour<ret>",
+        indoc! {"\
+            one
+            #[four|]#
+            two
+            three
+            "},
+    ))
+    .await?;
+
+    test((
+        indoc! {"\
+            #[o|]#ne
+            two
+            three
+            "},
+        "<space>lthr<ret>",
+        indoc! {"\
+            one
+            two
+            #[three|]#
+            "},
+    ))
+    .await?;
+
+    Ok(())
+}

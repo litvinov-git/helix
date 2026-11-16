@@ -423,6 +423,7 @@ impl MappableCommand {
         code_action, "Perform code action",
         buffer_picker, "Open buffer picker",
         jumplist_picker, "Open jumplist picker",
+        buffer_lines_picker, "Open picker of the lines of the current buffer",
         symbol_picker, "Open symbol picker",
         syntax_symbol_picker, "Open symbol picker from syntax information",
         lsp_or_syntax_symbol_picker, "Open symbol picker from LSP or syntax information",
@@ -3815,6 +3816,75 @@ fn jumplist_picker(cx: &mut Context) {
         let line = meta.selection.primary().cursor_line(doc.text().slice(..));
         Some((meta.id.into(), Some((line, line))))
     });
+    cx.push_layer(Box::new(overlaid(picker)));
+}
+
+fn buffer_lines_picker(cx: &mut Context) {
+    struct LineMeta {
+        /// Zero-based line number.
+        line: usize,
+        /// The contents of the line without the line ending.
+        text: String,
+    }
+
+    let (view, doc) = current!(cx.editor);
+    let doc_id = doc.id();
+    let text = doc.text().slice(..);
+    let cursor_line = doc.selection(view.id).primary().cursor_line(text);
+
+    // The text of the document in memory is used, so unsaved changes are
+    // included. A trailing line ending doesn't start a new (empty) line.
+    let line_count = if text.len_chars() > 0
+        && line_end_char_index(&text, text.len_lines() - 1)
+            == text.line_to_char(text.len_lines() - 1)
+    {
+        text.len_lines() - 1
+    } else {
+        text.len_lines()
+    };
+    let items = (0..line_count)
+        .map(|line| LineMeta {
+            line,
+            text: text
+                .slice(text.line_to_char(line)..line_end_char_index(&text, line))
+                .to_string(),
+        })
+        .collect::<Vec<_>>();
+
+    let columns = [
+        PickerColumn::new("line", |meta: &LineMeta, _| {
+            (meta.line + 1).to_string().into()
+        })
+        .without_filtering(),
+        PickerColumn::new("text", |meta: &LineMeta, _| meta.text.as_str().into()),
+    ];
+
+    let picker = Picker::new(
+        columns,
+        1, // text
+        items,
+        (),
+        move |cx, meta, action| {
+            cx.editor.switch(doc_id, action);
+            let config = cx.editor.config();
+            let (view, doc) = (view_mut!(cx.editor), doc_mut!(cx.editor, &doc_id));
+            let text = doc.text().slice(..);
+            // The document may have changed since the picker was opened.
+            if meta.line >= text.len_lines() {
+                return;
+            }
+            let start = text.line_to_char(meta.line);
+            let end = line_end_char_index(&text, meta.line);
+            push_jump(view, doc);
+            doc.set_selection(view.id, Selection::single(start, end));
+            if action.align_view(view, doc.id()) {
+                view.ensure_cursor_in_view_center(doc, config.scrolloff);
+            }
+        },
+    )
+    .with_initial_cursor(cursor_line as u32)
+    .with_preview(move |_editor, meta| Some((doc_id.into(), Some((meta.line, meta.line)))))
+    .truncate_start(false);
     cx.push_layer(Box::new(overlaid(picker)));
 }
 

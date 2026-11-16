@@ -76,7 +76,7 @@
 | `search_prev` | Select previous search match | normal: `` N ``, `` ZN ``, `` zN ``, select: `` ZN ``, `` zN `` |
 | `extend_search_next` | Add next search match to selection | select: `` n `` |
 | `extend_search_prev` | Add previous search match to selection | select: `` N `` |
-| `fuzzy_search` | Fuzzy search in visible lines |  |
+| `fuzzy_search` | Fuzzy search in visible lines | normal: `` g/ ``, select: `` g/ `` |
 | `fuzzy_search_down` | Fuzzy search in visible lines from the cursor line down |  |
 | `fuzzy_search_up` | Fuzzy search in visible lines from the cursor line up |  |
 | `fuzzy_search_global` | Fuzzy search in the whole document |  |
@@ -114,6 +114,7 @@
 | `code_action` | Perform code action | normal: `` <space>a ``, select: `` <space>a `` |
 | `buffer_picker` | Open buffer picker | normal: `` <space>b ``, select: `` <space>b `` |
 | `jumplist_picker` | Open jumplist picker | normal: `` <space>j ``, select: `` <space>j `` |
+| `buffer_lines_picker` | Open picker of the lines of the current buffer | normal: `` <space>l ``, select: `` <space>l `` |
 | `symbol_picker` | Open symbol picker |  |
 | `syntax_symbol_picker` | Open symbol picker from syntax information |  |
 | `lsp_or_syntax_symbol_picker` | Open symbol picker from LSP or syntax information | normal: `` <space>s ``, select: `` <space>s `` |
