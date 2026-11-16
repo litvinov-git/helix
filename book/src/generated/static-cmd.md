@@ -76,6 +76,14 @@
 | `search_prev` | Select previous search match | normal: `` N ``, `` ZN ``, `` zN ``, select: `` ZN ``, `` zN `` |
 | `extend_search_next` | Add next search match to selection | select: `` n `` |
 | `extend_search_prev` | Add previous search match to selection | select: `` N `` |
+| `fuzzy_search` | Fuzzy search in visible lines |  |
+| `fuzzy_search_down` | Fuzzy search in visible lines from the cursor line down |  |
+| `fuzzy_search_up` | Fuzzy search in visible lines from the cursor line up |  |
+| `fuzzy_search_global` | Fuzzy search in the whole document |  |
+| `fuzzy_search_next` | Select next fuzzy search match |  |
+| `fuzzy_search_prev` | Select previous fuzzy search match |  |
+| `extend_fuzzy_search_next` | Add next fuzzy search match to selection |  |
+| `extend_fuzzy_search_prev` | Add previous fuzzy search match to selection |  |
 | `search_selection` | Use current selection as search pattern | normal: `` <A-*> ``, select: `` <A-*> `` |
 | `search_selection_detect_word_boundaries` | Use current selection as the search pattern, automatically wrapping with `\b` on word boundaries | normal: `` * ``, select: `` * `` |
 | `make_search_word_bounded` | Modify current search to make it word bounded |  |

@@ -240,6 +240,7 @@ Jumps to various locations.
 | `j`   | Move down textual (instead of visual) line       | `move_line_down`           |
 | `k`   | Move up textual (instead of visual) line         | `move_line_up`             |
 | `w`   | Show labels at each word and select the word that belongs to the entered labels | `goto_word` |
+| `/`   | Fuzzy search in the visible lines | `fuzzy_search` |
 
 #### Match mode
 

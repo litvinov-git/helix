@@ -29,6 +29,10 @@ pub struct Registers {
     inner: HashMap<char, Vec<String>>,
     clipboard_provider: Box<dyn DynAccess<ClipboardProvider>>,
     pub last_search_register: char,
+    pub last_fuzzy_search_register: char,
+    /// Whether the last fuzzy search was done on the whole document instead
+    /// of the visible lines only.
+    pub last_fuzzy_search_global: bool,
 }
 
 impl Registers {
@@ -37,6 +41,8 @@ impl Registers {
             inner: Default::default(),
             clipboard_provider,
             last_search_register: '/',
+            last_fuzzy_search_register: '~',
+            last_fuzzy_search_global: false,
         }
     }
 
