@@ -195,3 +195,37 @@ async fn fuzzy_search_visible_lines_only() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[tokio::test(flavor = "multi_thread")]
+async fn fuzzy_search_matches_are_dropped_by_other_changes() -> anyhow::Result<()> {
+    // Matches are not recalculated: after another motion the next match
+    // action does nothing.
+    test_fuzzy((
+        indoc! {"\
+            #[x|]#x
+            ab xx a_b
+            "},
+        "<A-f>ab<ret>l<A-n>",
+        indoc! {"\
+            xx
+            ab#[ |]#xx a_b
+            "},
+    ))
+    .await?;
+
+    // The same goes for editing the document.
+    test_fuzzy((
+        indoc! {"\
+            #[x|]#x
+            ab xx a_b
+            "},
+        "<A-f>ab<ret>~<A-n>",
+        indoc! {"\
+            xx
+            #[AB|]# xx a_b
+            "},
+    ))
+    .await?;
+
+    Ok(())
+}

@@ -2,11 +2,11 @@ use std::{borrow::Cow, collections::HashMap, iter};
 
 use anyhow::Result;
 use arc_swap::access::DynAccess;
-use helix_core::NATIVE_LINE_ENDING;
+use helix_core::{Selection, NATIVE_LINE_ENDING};
 
 use crate::{
     clipboard::{ClipboardError, ClipboardProvider, ClipboardType},
-    Editor,
+    DocumentId, Editor,
 };
 
 /// A key-value store for saving sets of values.
@@ -29,10 +29,9 @@ pub struct Registers {
     inner: HashMap<char, Vec<String>>,
     clipboard_provider: Box<dyn DynAccess<ClipboardProvider>>,
     pub last_search_register: char,
-    pub last_fuzzy_search_register: char,
-    /// Whether the last fuzzy search was done on the whole document instead
-    /// of the visible lines only.
-    pub last_fuzzy_search_global: bool,
+    /// The matches of the last fuzzy search along with the document (and its
+    /// version) they belong to. Only valid until the document is changed.
+    pub fuzzy_search_matches: Option<(DocumentId, i32, Selection)>,
 }
 
 impl Registers {
@@ -41,8 +40,7 @@ impl Registers {
             inner: Default::default(),
             clipboard_provider,
             last_search_register: '/',
-            last_fuzzy_search_register: '~',
-            last_fuzzy_search_global: false,
+            fuzzy_search_matches: None,
         }
     }
 

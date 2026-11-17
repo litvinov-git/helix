@@ -2492,15 +2492,6 @@ enum FuzzySearchScope {
 /// tighter matches at all.
 const FUZZY_SEARCH_MAX_SPAN: usize = 18;
 
-#[derive(Debug, Clone, Copy)]
-struct FuzzyMatch {
-    /// Char index of the first matched char.
-    from: usize,
-    /// Char index after the last matched char.
-    to: usize,
-    score: u16,
-}
-
 fn fuzzy_search_lines(
     view: &View,
     doc: &Document,
@@ -2525,17 +2516,19 @@ fn fuzzy_search_lines(
 }
 
 /// Fuzzy matches `query` against each of the `lines`. A line can contain
-/// multiple (non-overlapping) matches. The matches are sorted by position.
+/// multiple (non-overlapping) matches. The matches are returned as a selection,
+/// sorted by position like the matches of a regex search, with the best
+/// scoring match as primary range.
 fn fuzzy_search_matches(
     text: RopeSlice,
     lines: std::ops::Range<usize>,
     query: &str,
     smart_case: bool,
-) -> Vec<FuzzyMatch> {
+) -> Option<Selection> {
     // Whitespace is not part of the fuzzy needle.
     let needle: String = query.chars().filter(|ch| !ch.is_whitespace()).collect();
     if needle.is_empty() {
-        return Vec::new();
+        return None;
     }
     let case_matching = if smart_case {
         CaseMatching::Smart
@@ -2552,6 +2545,7 @@ fn fuzzy_search_matches(
     let mut matcher = helix_core::fuzzy::MATCHER.lock();
     matcher.config = nucleo::Config::DEFAULT;
 
+    // Matches and their scores.
     let mut matches = Vec::new();
     // Matches that are too spread out. One per line at most.
     let mut wide_matches = Vec::new();
@@ -2580,18 +2574,14 @@ fn fuzzy_search_matches(
                 continue;
             };
             let (first, last) = (from + *first as usize, from + *last as usize);
-            let mat = FuzzyMatch {
-                from: line_start + first,
-                to: line_start + last + 1,
-                score,
-            };
+            let range = Range::new(line_start + first, line_start + last + 1);
             segments.push((from, first));
             if last - first < FUZZY_SEARCH_MAX_SPAN {
-                matches.push(mat);
+                matches.push((range, score));
                 segments.push((last + 1, to));
             } else {
                 if (from, to) == (0, chars.len()) {
-                    wide_matches.push(mat);
+                    wide_matches.push((range, score));
                 }
                 // There could still be a tighter match inside of this one.
                 segments.push((first + 1, to));
@@ -2602,73 +2592,15 @@ fn fuzzy_search_matches(
     if matches.is_empty() {
         matches = wide_matches;
     }
-    matches.sort_unstable_by_key(|mat| mat.from);
-    matches
-}
-
-/// Selects a fuzzy match of `query`: the next/previous one relative to the
-/// primary selection if a `direction` is given and the best one otherwise.
-#[allow(clippy::too_many_arguments)]
-fn fuzzy_search_impl(
-    editor: &mut Editor,
-    query: &str,
-    scope: FuzzySearchScope,
-    movement: Movement,
-    direction: Option<Direction>,
-    scrolloff: usize,
-    wrap_around: bool,
-    show_warnings: bool,
-) {
-    let smart_case = editor.config().search.smart_case;
-    let (view, doc) = current!(editor);
-    let text = doc.text().slice(..);
-    let pos = doc.selection(view.id).primary().from();
-
-    let lines = fuzzy_search_lines(view, doc, scope);
-    let matches = fuzzy_search_matches(text, lines, query, smart_case);
-
-    let mut mat = match direction {
-        // `max_by_key` returns the last maximum, prefer the first one.
-        None => matches.iter().rev().max_by_key(|mat| mat.score),
-        Some(Direction::Forward) => matches.iter().find(|mat| mat.from > pos),
-        Some(Direction::Backward) => matches.iter().rev().find(|mat| mat.from < pos),
-    };
-
-    if mat.is_none() {
-        if wrap_around {
-            mat = match direction {
-                None => None,
-                Some(Direction::Forward) => matches.first(),
-                Some(Direction::Backward) => matches.last(),
-            };
-        }
-        if show_warnings {
-            if mat.is_none() {
-                editor.set_error("No more matches");
-            } else if scope == FuzzySearchScope::Global {
-                editor.set_status("Wrapped around document");
-            } else {
-                editor.set_status("Wrapped around view");
-            }
-        }
-    }
-
-    let (view, doc) = current!(editor);
-    let selection = doc.selection(view.id);
-
-    if let Some(mat) = mat {
-        // Determine range direction based on the primary range
-        let primary = selection.primary();
-        let range = Range::new(mat.from, mat.to).with_direction(primary.direction());
-
-        let selection = match movement {
-            Movement::Extend => selection.clone().push(range),
-            Movement::Move => selection.clone().replace(selection.primary_index(), range),
-        };
-
-        doc.set_selection(view.id, selection);
-        view.ensure_cursor_in_view_center(doc, scrolloff);
-    };
+    matches.sort_unstable_by_key(|(range, _)| range.from());
+    // The first of the best scoring matches.
+    let best = matches
+        .iter()
+        .enumerate()
+        .max_by_key(|(i, (_, score))| (*score, std::cmp::Reverse(*i)))
+        .map(|(i, _)| i)?;
+    let ranges = matches.into_iter().map(|(range, _)| range).collect();
+    Some(Selection::new(ranges, best))
 }
 
 fn fuzzy_search(cx: &mut Context) {
@@ -2691,6 +2623,7 @@ fn fuzzy_searcher(cx: &mut Context, scope: FuzzySearchScope) {
     let reg = cx.register.unwrap_or('~');
     let config = cx.editor.config();
     let scrolloff = config.scrolloff;
+    let smart_case = config.search.smart_case;
     let movement = if cx.editor.mode() == Mode::Select {
         Movement::Extend
     } else {
@@ -2731,20 +2664,34 @@ fn fuzzy_searcher(cx: &mut Context, scope: FuzzySearchScope) {
             if event == PromptEvent::Validate {
                 // Equivalent to push_jump to store selection just before jump
                 view.push_jump_to(doc, snapshot.clone());
-                cx.editor.registers.last_fuzzy_search_register = reg;
-                cx.editor.registers.last_fuzzy_search_global = scope == FuzzySearchScope::Global;
+                cx.editor.registers.fuzzy_search_matches = None;
             }
 
-            fuzzy_search_impl(
-                cx.editor,
-                input,
-                scope,
-                movement,
-                None,
-                scrolloff,
-                false,
-                event == PromptEvent::Validate,
-            );
+            let text = doc.text().slice(..);
+            let lines = fuzzy_search_lines(view, doc, scope);
+            let Some(matches) = fuzzy_search_matches(text, lines, input, smart_case) else {
+                if event == PromptEvent::Validate {
+                    cx.editor.set_error("No matches");
+                }
+                return;
+            };
+
+            // Jump to the best match, the others can be reached with
+            // `fuzzy_search_next` and `fuzzy_search_prev`.
+            let selection = doc.selection(view.id);
+            let range = matches
+                .primary()
+                .with_direction(selection.primary().direction());
+            let selection = match movement {
+                Movement::Extend => selection.clone().push(range),
+                Movement::Move => selection.clone().replace(selection.primary_index(), range),
+            };
+            doc.set_selection(view.id, selection);
+            view.ensure_cursor_in_view_center(doc, scrolloff);
+
+            if event == PromptEvent::Validate {
+                cx.editor.registers.fuzzy_search_matches = Some((doc_id, doc.version(), matches));
+            }
         },
     );
     // Calculate initial completion
@@ -2754,31 +2701,61 @@ fn fuzzy_searcher(cx: &mut Context, scope: FuzzySearchScope) {
 
 fn fuzzy_search_next_or_prev_impl(cx: &mut Context, movement: Movement, direction: Direction) {
     let count = cx.count();
-    let register = cx
-        .register
-        .unwrap_or(cx.editor.registers.last_fuzzy_search_register);
-    // Matches are not stored, the query is matched again on what is visible now.
-    let scope = if cx.editor.registers.last_fuzzy_search_global {
-        FuzzySearchScope::Global
-    } else {
-        FuzzySearchScope::Visible
-    };
     let config = cx.editor.config();
     let scrolloff = config.scrolloff;
     let wrap_around = config.search.wrap_around;
-    if let Some(query) = cx.editor.registers.first(register, cx.editor) {
-        let query = query.into_owned();
-        for _ in 0..count {
-            fuzzy_search_impl(
-                cx.editor,
-                &query,
-                scope,
-                movement,
-                Some(direction),
-                scrolloff,
-                wrap_around,
-                true,
-            );
+
+    // The matches are never recalculated: they are only kept as long as
+    // the document is unchanged and the primary selection is one of them,
+    // so until a motion other than navigating the matches is performed.
+    let doc = doc!(cx.editor);
+    let matches = cx
+        .editor
+        .registers
+        .fuzzy_search_matches
+        .as_ref()
+        .filter(|(doc_id, version, _)| *doc_id == doc.id() && *version == doc.version())
+        .map(|(_, _, matches)| matches.clone());
+    let Some(matches) = matches else {
+        cx.editor.set_error("No fuzzy search matches");
+        return;
+    };
+    let ranges = matches.ranges();
+
+    for _ in 0..count {
+        let (view, doc) = current!(cx.editor);
+        let selection = doc.selection(view.id);
+        let primary = selection.primary();
+        let Some(index) = ranges
+            .binary_search_by_key(&primary.from(), Range::from)
+            .ok()
+            .filter(|&index| ranges[index].to() == primary.to())
+        else {
+            cx.editor.set_error("No fuzzy search matches");
+            return;
+        };
+
+        let next = match direction {
+            Direction::Forward if index + 1 < ranges.len() => Some(index + 1),
+            Direction::Forward => wrap_around.then_some(0),
+            Direction::Backward if index > 0 => Some(index - 1),
+            Direction::Backward => wrap_around.then(|| ranges.len() - 1),
+        };
+        let Some(next) = next else {
+            cx.editor.set_error("No more matches");
+            return;
+        };
+
+        let range = ranges[next].with_direction(primary.direction());
+        let selection = match movement {
+            Movement::Extend => selection.clone().push(range),
+            Movement::Move => selection.clone().replace(selection.primary_index(), range),
+        };
+        doc.set_selection(view.id, selection);
+        view.ensure_cursor_in_view_center(doc, scrolloff);
+
+        if (direction == Direction::Forward) == (next <= index) {
+            cx.editor.set_status("Wrapped around");
         }
     }
 }
