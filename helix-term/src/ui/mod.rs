@@ -202,6 +202,68 @@ pub fn raw_regex_prompt(
     cx.push_layer(Box::new(prompt));
 }
 
+/// Like [`regex_prompt`] but for fuzzy queries: the input needs no parsing so it
+/// is passed to `fun` as it is.
+pub fn fuzzy_prompt(
+    cx: &mut crate::commands::Context,
+    prompt: std::borrow::Cow<'static, str>,
+    history_register: Option<char>,
+    completion_fn: impl FnMut(&Editor, &str) -> Vec<prompt::Completion> + 'static,
+    fun: impl Fn(&mut crate::compositor::Context, &str, PromptEvent) + 'static,
+) {
+    let (view, doc) = current!(cx.editor);
+    let doc_id = view.doc;
+    let view_id = view.id;
+    let snapshot = doc.selection(view.id).clone();
+    let offset_snapshot = doc.view_offset(view.id);
+    let config = cx.editor.config();
+
+    let mut prompt = Prompt::new(
+        prompt,
+        history_register,
+        completion_fn,
+        move |cx: &mut crate::compositor::Context, input: &str, event: PromptEvent| {
+            match event {
+                PromptEvent::Abort => {
+                    let doc = doc_mut!(cx.editor, &doc_id);
+                    let view = view_mut!(cx.editor, view_id);
+                    doc.set_selection(view.id, snapshot.clone());
+                    doc.set_view_offset(view.id, offset_snapshot);
+                }
+                PromptEvent::Update | PromptEvent::Validate => {
+                    // skip empty input
+                    if input.is_empty() {
+                        return;
+                    }
+
+                    let doc = doc_mut!(cx.editor, &doc_id);
+                    let view = view_mut!(cx.editor, view_id);
+
+                    // revert state to what it was before the last update,
+                    // including the view offset (unlike for regex search)
+                    // as the lines which are searched depend on it
+                    doc.set_selection(view.id, snapshot.clone());
+                    doc.set_view_offset(view.id, offset_snapshot);
+
+                    if event == PromptEvent::Validate {
+                        // Equivalent to push_jump to store selection just before jump
+                        view.push_jump_to(doc, snapshot.clone());
+                    }
+
+                    fun(cx, input, event);
+
+                    let (view, doc) = current!(cx.editor);
+                    view.ensure_cursor_in_view(doc, config.scrolloff);
+                }
+            }
+        },
+    );
+    // Calculate initial completion
+    prompt.recalculate_completion(cx.editor);
+    // prompt
+    cx.push_layer(Box::new(prompt));
+}
+
 /// We want to exclude files that the editor can't handle yet
 fn get_excluded_types() -> ignore::types::Types {
     use ignore::types::TypesBuilder;

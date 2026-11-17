@@ -2603,6 +2603,36 @@ fn fuzzy_search_matches(
     Some(Selection::new(ranges, best))
 }
 
+/// Jumps to the best fuzzy match of `query` and returns all of the matches.
+fn fuzzy_search_impl(
+    editor: &mut Editor,
+    query: &str,
+    scope: FuzzySearchScope,
+    movement: Movement,
+    scrolloff: usize,
+) -> Option<Selection> {
+    let smart_case = editor.config().search.smart_case;
+    let (view, doc) = current!(editor);
+    let text = doc.text().slice(..);
+    let lines = fuzzy_search_lines(view, doc, scope);
+    let matches = fuzzy_search_matches(text, lines, query, smart_case)?;
+
+    let selection = doc.selection(view.id);
+
+    // Determine range direction based on the primary range
+    let range = matches
+        .primary()
+        .with_direction(selection.primary().direction());
+    let selection = match movement {
+        Movement::Extend => selection.clone().push(range),
+        Movement::Move => selection.clone().replace(selection.primary_index(), range),
+    };
+
+    doc.set_selection(view.id, selection);
+    view.ensure_cursor_in_view_center(doc, scrolloff);
+    Some(matches)
+}
+
 fn fuzzy_search(cx: &mut Context) {
     fuzzy_searcher(cx, FuzzySearchScope::Visible)
 }
@@ -2623,7 +2653,6 @@ fn fuzzy_searcher(cx: &mut Context, scope: FuzzySearchScope) {
     let reg = cx.register.unwrap_or('~');
     let config = cx.editor.config();
     let scrolloff = config.scrolloff;
-    let smart_case = config.search.smart_case;
     let movement = if cx.editor.mode() == Mode::Select {
         Movement::Extend
     } else {
@@ -2632,13 +2661,8 @@ fn fuzzy_searcher(cx: &mut Context, scope: FuzzySearchScope) {
 
     let completions = search_completions(cx, Some(reg));
 
-    let (view, doc) = current!(cx.editor);
-    let doc_id = view.doc;
-    let view_id = view.id;
-    let snapshot = doc.selection(view.id).clone();
-    let offset_snapshot = doc.view_offset(view.id);
-
-    let mut prompt = Prompt::new(
+    ui::fuzzy_prompt(
+        cx,
         "fuzzy-search:".into(),
         Some(reg),
         move |_editor: &Editor, input: &str| {
@@ -2648,55 +2672,20 @@ fn fuzzy_searcher(cx: &mut Context, scope: FuzzySearchScope) {
                 .map(|comp| (0.., comp.clone().into()))
                 .collect()
         },
-        move |cx: &mut compositor::Context, input: &str, event: PromptEvent| {
-            let doc = doc_mut!(cx.editor, &doc_id);
-            let view = view_mut!(cx.editor, view_id);
-
-            // Revert state to what it was before the last update. This also
-            // keeps the lines that are searched the same while typing.
-            doc.set_selection(view.id, snapshot.clone());
-            doc.set_view_offset(view.id, offset_snapshot);
-
-            if event == PromptEvent::Abort || input.is_empty() {
+        move |cx, input, event| {
+            let matches = fuzzy_search_impl(cx.editor, input, scope, movement, scrolloff);
+            if event != PromptEvent::Validate {
                 return;
             }
-
-            if event == PromptEvent::Validate {
-                // Equivalent to push_jump to store selection just before jump
-                view.push_jump_to(doc, snapshot.clone());
-                cx.editor.registers.fuzzy_search_matches = None;
-            }
-
-            let text = doc.text().slice(..);
-            let lines = fuzzy_search_lines(view, doc, scope);
-            let Some(matches) = fuzzy_search_matches(text, lines, input, smart_case) else {
-                if event == PromptEvent::Validate {
-                    cx.editor.set_error("No matches");
-                }
-                return;
-            };
-
-            // Jump to the best match, the others can be reached with
-            // `fuzzy_search_next` and `fuzzy_search_prev`.
-            let selection = doc.selection(view.id);
-            let range = matches
-                .primary()
-                .with_direction(selection.primary().direction());
-            let selection = match movement {
-                Movement::Extend => selection.clone().push(range),
-                Movement::Move => selection.clone().replace(selection.primary_index(), range),
-            };
-            doc.set_selection(view.id, selection);
-            view.ensure_cursor_in_view_center(doc, scrolloff);
-
-            if event == PromptEvent::Validate {
-                cx.editor.registers.fuzzy_search_matches = Some((doc_id, doc.version(), matches));
+            // Keep the matches for `fuzzy_search_next` and `fuzzy_search_prev`.
+            let (view, doc) = current!(cx.editor);
+            cx.editor.registers.fuzzy_search_matches =
+                matches.map(|matches| (view.doc, doc.version(), matches));
+            if cx.editor.registers.fuzzy_search_matches.is_none() {
+                cx.editor.set_error("No matches");
             }
         },
     );
-    // Calculate initial completion
-    prompt.recalculate_completion(cx.editor);
-    cx.push_layer(Box::new(prompt));
 }
 
 fn fuzzy_search_next_or_prev_impl(cx: &mut Context, movement: Movement, direction: Direction) {
