@@ -361,6 +361,7 @@ impl MappableCommand {
         extend_till_prev_char, "Extend till previous occurrence of char",
         extend_prev_char, "Extend to previous occurrence of char",
         repeat_last_motion, "Repeat last motion",
+        repeat, "Repeat the last command",
         replace, "Replace with new char",
         switch_case, "Switch (toggle) case",
         switch_to_uppercase, "Switch to uppercase",
@@ -1826,6 +1827,16 @@ fn extend_prev_char(cx: &mut Context) {
 
 fn repeat_last_motion(cx: &mut Context) {
     cx.editor.repeat_last_motion(cx.count())
+}
+
+fn repeat(cx: &mut Context) {
+    let count = cx.count();
+    cx.callback.push(Box::new(move |compositor, cx| {
+        let editor_view = compositor.find::<ui::EditorView>().unwrap();
+        for callback in editor_view.repeat(cx, count) {
+            callback(compositor, cx)
+        }
+    }));
 }
 
 fn replace(cx: &mut Context) {

@@ -52,6 +52,7 @@
 | `extend_till_prev_char` | Extend till previous occurrence of char | select: `` T `` |
 | `extend_prev_char` | Extend to previous occurrence of char | select: `` F `` |
 | `repeat_last_motion` | Repeat last motion | normal: `` <A-.> ``, select: `` <A-.> `` |
+| `repeat` | Repeat the last command | normal: `` . ``, select: `` . `` |
 | `replace` | Replace with new char | normal: `` r ``, select: `` r `` |
 | `switch_case` | Switch (toggle) case | normal: `` ~ ``, select: `` ~ `` |
 | `switch_to_uppercase` | Switch to uppercase | normal: `` <A-`> ``, select: `` <A-`> `` |

@@ -1133,3 +1133,115 @@ async fn buffer_lines_picker() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[tokio::test(flavor = "multi_thread")]
+async fn repeat_any_command() -> anyhow::Result<()> {
+    // `.` repeats the last command, not only insertions
+    test((
+        indoc! {"\
+            #[a|]#
+            b
+            c
+            d
+            "},
+        "x.",
+        indoc! {"\
+            #[a
+            b
+            |]#c
+            d
+            "},
+    ))
+    .await?;
+
+    // with a count
+    test((
+        indoc! {"\
+            #[a|]#
+            b
+            c
+            d
+            "},
+        "x3.",
+        indoc! {"\
+            #[a
+            b
+            c
+            d
+            |]#"},
+    ))
+    .await?;
+
+    // the last command is repeated, not the last insertion
+    test((
+        indoc! {"\
+            #[a|]#
+            b
+            c
+            "},
+        "ix<esc>l.",
+        indoc! {"\
+            xa
+            #[b|]#
+            c
+            "},
+    ))
+    .await?;
+
+    // insertions are still repeated with the typed text
+    test((
+        indoc! {"\
+            #[a|]#
+            b
+            "},
+        "ix<esc>.",
+        indoc! {"\
+            xx#[|a]#
+            b
+            "},
+    ))
+    .await?;
+
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn repeat_command_with_following_keys() -> anyhow::Result<()> {
+    // `mm` is a single command
+    test((
+        indoc! {"\
+            #[(|]#a)
+            "},
+        "mm.",
+        indoc! {"\
+            #[(|]#a)
+            "},
+    ))
+    .await?;
+
+    // `ms(` is a command followed by the char to surround with
+    test((
+        indoc! {"\
+            #[a|]#
+            "},
+        "ms(.",
+        indoc! {"\
+            #[((a))|]#
+            "},
+    ))
+    .await?;
+
+    // `f` and the char to find
+    test((
+        indoc! {"\
+            #[a|]#bcbcb
+            "},
+        "fb.",
+        indoc! {"\
+            a#[bcb|]#cb
+            "},
+    ))
+    .await?;
+
+    Ok(())
+}

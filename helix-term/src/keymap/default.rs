@@ -18,6 +18,7 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
         "r" => replace,
         "R" => replace_with_yanked,
         "A-." =>  repeat_last_motion,
+        "." => repeat,
 
         "~" => switch_case,
         "`" => switch_to_lowercase,

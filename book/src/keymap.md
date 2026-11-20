@@ -80,7 +80,7 @@ Normal mode is the default mode when you launch helix. You can return to it from
 | `A`         | Insert at the end of the line                                        | `insert_at_line_end`      |
 | `o`         | Open new line below selection                                        | `open_below`              |
 | `O`         | Open new line above selection                                        | `open_above`              |
-| `.`         | Repeat last insert                                                   | N/A                       |
+| `.`         | Repeat last command (including the text typed in insert mode)        | `repeat`                  |
 | `u`         | Undo change                                                          | `undo`                    |
 | `U`         | Redo change                                                          | `redo`                    |
 | `Alt-u`     | Move backward in history                                             | `earlier`                 |
