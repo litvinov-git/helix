@@ -404,10 +404,10 @@ mod tests {
             Mode::Normal => keymap!({ "Normal mode"
                 "i" => normal_mode,
                 "无" => insert_mode,
-                "z" => jump_backward,
-                "g" => { "Merge into goto mode"
+                "t" => jump_backward,
+                "w" => { "Merge into window mode"
                     "$" => goto_line_end,
-                    "g" => delete_char_forward,
+                    "w" => delete_char_forward,
                 },
             })
         };
@@ -426,30 +426,30 @@ mod tests {
             KeymapResult::Matched(MappableCommand::insert_mode),
             "New leaf should be present in merged keymap"
         );
-        // Assumes that z is a node in the default keymap
+        // Assumes that t is a node in the default keymap
         assert_eq!(
-            keymap.get(Mode::Normal, key!('z')),
+            keymap.get(Mode::Normal, key!('t')),
             KeymapResult::Matched(MappableCommand::jump_backward),
             "Leaf should replace node"
         );
 
         let keymap = merged_keyamp.get_mut(&Mode::Normal).unwrap();
-        // Assumes that `g` is a node in default keymap
+        // Assumes that `w` is a node in default keymap
         assert_eq!(
-            keymap.search(&[key!('g'), key!('$')]).unwrap(),
+            keymap.search(&[key!('w'), key!('$')]).unwrap(),
             &KeyTrie::MappableCommand(MappableCommand::goto_line_end),
             "Leaf should be present in merged subnode"
         );
-        // Assumes that `gg` is in default keymap
+        // Assumes that `ww` is in default keymap
         assert_eq!(
-            keymap.search(&[key!('g'), key!('g')]).unwrap(),
+            keymap.search(&[key!('w'), key!('w')]).unwrap(),
             &KeyTrie::MappableCommand(MappableCommand::delete_char_forward),
             "Leaf should replace old leaf in merged subnode"
         );
-        // Assumes that `gc` is in default keymap
+        // Assumes that `ws` is in default keymap
         assert_eq!(
-            keymap.search(&[key!('g'), key!('c')]).unwrap(),
-            &KeyTrie::MappableCommand(MappableCommand::toggle_comments),
+            keymap.search(&[key!('w'), key!('s')]).unwrap(),
+            &KeyTrie::MappableCommand(MappableCommand::hsplit),
             "Old leaves in subnode should be present in merged node"
         );
 
@@ -496,6 +496,43 @@ mod tests {
             node.node().unwrap().keys().copied().collect::<Vec<_>>(),
             vec![key!('v'), key!('c')]
         );
+    }
+
+    #[test]
+    fn default_keymap_has_no_empty_nodes_and_select_extends_normal() {
+        fn walk(trie: &KeyTrie, path: &mut Vec<KeyEvent>, leaves: &mut Vec<Vec<KeyEvent>>) {
+            match trie {
+                KeyTrie::Node(node) => {
+                    assert!(!node.is_empty(), "Empty node at {:?}", path);
+                    for (key, child) in node.iter() {
+                        path.push(*key);
+                        walk(child, path, leaves);
+                        path.pop();
+                    }
+                }
+                _ => leaves.push(path.clone()),
+            }
+        }
+
+        let keymaps = Keymaps::default().map();
+        let (mut normal, mut select) = (Vec::new(), Vec::new());
+        walk(&keymaps[&Mode::Normal], &mut Vec::new(), &mut normal);
+        walk(&keymaps[&Mode::Select], &mut Vec::new(), &mut select);
+        // Every sequence is either a leaf or a prefix, never both: a leaf's
+        // path must not be a strict prefix of another leaf.
+        for leaves in [&normal, &select] {
+            for a in leaves.iter() {
+                assert!(
+                    !leaves.iter().any(|b| b.len() > a.len() && b.starts_with(a)),
+                    "{:?} is both a command and a prefix",
+                    a
+                );
+            }
+        }
+        // Select mode only overrides normal mode, it never removes a key.
+        for path in &normal {
+            assert!(select.contains(path), "{:?} missing in select mode", path);
+        }
     }
 
     #[test]

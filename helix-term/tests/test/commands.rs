@@ -281,13 +281,13 @@ async fn test_undo_redo() -> anyhow::Result<()> {
     // A jumplist selection is created at a point which is undone.
     //
     // * n<esc> (twice) Add two newlines. We're now on line 3.
-    // * <C-s>       Save the selection on line 3 in the jumplist.
+    // * <A-s>       Save the selection on line 3 in the jumplist.
     // * ue (twice)  Undo the two newlines. We're now on line 1.
     // * <C-o><C-i>  Jump forward an back again in the jumplist. This would panic
     //               if the jumplist were not being updated correctly.
-    test((
+    test_extra_keys((
         "#[|]#",
-        "n<esc>n<esc><C-s>ueue<C-o><C-i>",
+        "n<esc>n<esc><A-s>ueue<C-o><C-i>",
         "#[\n|]#",
         LineFeedHandling::AsIs,
     ))
@@ -296,22 +296,22 @@ async fn test_undo_redo() -> anyhow::Result<()> {
     // A jumplist selection is passed through an edit and then an undo and then a redo.
     //
     // * n<esc>       Add a newline. We're now on line 2.
-    // * <C-s>       Save the selection on line 2 in the jumplist.
+    // * <A-s>       Save the selection on line 2 in the jumplist.
     // * id          Delete line 1. The jumplist selection should be adjusted to the new line 1.
     // * ueoe        Undo and redo the `id` edit.
     // * <C-o>       Jump back in the jumplist. This would panic if the jumplist were not being
     //               updated correctly.
     // * <C-i>       Jump forward to line 1.
-    test((
+    test_extra_keys((
         "#[|]#",
-        "n<esc><C-s>idueoe<C-o><C-i>",
+        "n<esc><A-s>idueoe<C-o><C-i>",
         "#[|]#",
         LineFeedHandling::AsIs,
     ))
     .await?;
 
     // In this case we 'redo' manually to ensure that the transactions are composing correctly.
-    test((
+    test_extra_keys((
         "#[|]#",
         "n<esc>uen<esc>ue",
         "#[\n|]#",
@@ -860,7 +860,7 @@ async fn test_toggle_comments_inside_comment_injection() -> anyhow::Result<()> {
         indoc! {"\
             // #[a|]#bc
         "},
-        ":lang rust<ret><C-c>",
+        ":lang rust<ret>/",
         indoc! {"\
             #[a|]#bc
         "},
@@ -874,7 +874,7 @@ async fn test_toggle_comments_inside_comment_injection() -> anyhow::Result<()> {
         indoc! {"\
             /// #[a|]#bc
         "},
-        ":lang rust<ret><C-c>",
+        ":lang rust<ret>/",
         indoc! {"\
             #[a|]#bc
         "},
@@ -886,7 +886,7 @@ async fn test_toggle_comments_inside_comment_injection() -> anyhow::Result<()> {
         indoc! {"\
             //! #[a|]#bc
         "},
-        ":lang rust<ret><C-c>",
+        ":lang rust<ret>/",
         indoc! {"\
             #[a|]#bc
         "},
@@ -899,7 +899,7 @@ async fn test_toggle_comments_inside_comment_injection() -> anyhow::Result<()> {
         indoc! {"\
             #[l|]#et x = 5;
         "},
-        ":lang rust<ret><C-c>",
+        ":lang rust<ret>/",
         indoc! {"\
             // #[l|]#et x = 5;
         "},
@@ -1272,5 +1272,24 @@ async fn repeat_command_with_prompt() -> anyhow::Result<()> {
     ))
     .await?;
 
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn extend_prev_next_keeps_the_anchor() -> anyhow::Result<()> {
+    let text = "#[a|]#\nb\n\nc\n\nd\n";
+    // `op` moves the cursor, `Op` extends the selection to the next paragraph.
+    test((text, "op", "#[a\nb\n\n|]#c\n\nd\n")).await?;
+    test(("a\nb\n\n#[c|]#\n\nd\n", "Op", "a\nb\n\n#[c\n\n|]#d\n")).await?;
+    // Select mode has the same behavior for `op`.
+    test(("a\nb\n\n#[c|]#\n\nd\n", "vop", "a\nb\n\n#[c\n\n|]#d\n")).await?;
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn match_mode_line_bounds_and_numbers() -> anyhow::Result<()> {
+    test(("a#[b|]#c\ndef\n", "ml", "#[abc\n|]#def\n")).await?;
+    test(("#[1|]#\n", "+", "#[2|]#\n")).await?;
+    test(("#[2|]#\n", "-", "#[1|]#\n")).await?;
     Ok(())
 }

@@ -272,6 +272,26 @@ pub async fn test_with_config<T: Into<TestCase>>(
     .await
 }
 
+/// Test with a few extra keys bound for commands that have no default key
+/// (`A-s` = `save_selection`, `A-t` / `A-T` = `find_till_char` / `till_prev_char`).
+pub async fn test_extra_keys<T: Into<TestCase>>(test_case: T) -> anyhow::Result<()> {
+    let keys = String::from(
+        r#"
+        [keys.normal]
+        "A-s" = "save_selection"
+        "A-t" = "find_till_char"
+        "A-T" = "till_prev_char"
+        "#,
+    );
+    let mut config = Config::load(
+        Ok(&keys),
+        Err(helix_term::config::ConfigLoadError::default()),
+    )
+    .unwrap();
+    config.editor = test_editor_config();
+    test_with_config(AppBuilder::new().with_config(config), test_case).await
+}
+
 pub async fn test<T: Into<TestCase>>(test_case: T) -> anyhow::Result<()> {
     test_with_config(AppBuilder::default(), test_case).await
 }

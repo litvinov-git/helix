@@ -5,12 +5,12 @@
   - [Find mode](#find-mode)
   - [Portal mode](#portal-mode)
   - [Prev / Next mode](#prev--next-mode)
+  - [Extend Prev / Next mode](#extend-prev--next-mode)
   - [Match mode](#match-mode)
   - [Symbol mode](#symbol-mode)
   - [Tree mode](#tree-mode)
   - [Window mode](#window-mode)
-  - [View mode](#view-mode)
-  - [Extras mode](#extras-mode)
+  - [Ctrl chords](#ctrl-chords)
   - [Single-key core](#single-key-core)
   - [Popups](#popups)
     - [Popup](#popup)
@@ -37,20 +37,19 @@ Normal mode is the default mode when you launch helix. You can return to it from
 
 ### Minor modes
 
-| Key     | Mode                                | Purpose                                                       |
-| -----   | ----                                | -------                                                       |
-| `f`     | [Find](#find-mode)                  | Pickers and searching                                         |
-| `Space` | [Portal](#portal-mode)              | Jump anywhere: search jumps, characters, lines, screen, files |
-| `u`     | [Prev](#prev--next-mode)            | Go to the previous one (undo, match, diagnostic, function, ...) |
-| `o`     | [Next](#prev--next-mode)            | Go to the next one (redo, match, diagnostic, function, ...)   |
-| `m`     | [Match](#match-mode)                | Create and manipulate selections                              |
-| `s`     | [Symbol](#symbol-mode)              | Everything the language server provides, except pickers       |
-| `t`     | [Tree](#tree-mode)                  | Tree-sitter nodes: `i` `k` `j` `l` = up, down, left, right    |
-| `w`     | [Window](#window-mode)              | Splits and window focus                                       |
-| `z`     | [View](#view-mode)                  | Scrolling and cursor line placement                           |
-| `g`     | [Extras](#extras-mode)              | Clipboard, comments, debugger                                 |
-| `v`     | [Select mode](#select--extend-mode) | Extend selections                                             |
-| `:`     |                                     | Command mode                                                  |
+| Key     | Mode                                         | Purpose                                                          |
+| -----   | ----                                         | -------                                                          |
+| `f`     | [Find](#find-mode)                           | Pickers and searching                                            |
+| `Space` | [Portal](#portal-mode)                       | Jump anywhere: search jumps, characters, lines, screen, files    |
+| `u`, `o`| [Prev / Next](#prev--next-mode)              | `u` goes to the previous one, `o` to the next one                |
+| `U`, `O`| [Extend Prev / Next](#extend-prev--next-mode)| The same motions, but the selection is extended                  |
+| `m`     | [Match](#match-mode)                         | Create and manipulate selections                                 |
+| `s`     | [Symbol](#symbol-mode)                       | Everything the language server provides, except pickers          |
+| `t`     | [Tree](#tree-mode)                           | Tree-sitter nodes: `i` `k` `j` `l` = up, down, left, right       |
+| `w`     | [Window](#window-mode)                       | Splits, window focus and view placement                          |
+| `Ctrl-` | [Ctrl](#ctrl-chords)                         | Save, quit and the system clipboard                              |
+| `v`     | [Select mode](#select--extend-mode)          | Extend selections                                                |
+| `:`     |                                              | Command mode                                                     |
 
 These modes (except command mode) can be configured by
 [remapping keys](https://docs.helix-editor.com/remapping.html#minor-modes). Note that binding a single key
@@ -93,8 +92,8 @@ Jump anywhere: search jumps, characters, lines, screen, files.
 | `<space>R` | Regex search backward | `rsearch` |
 | `<space>w` | Jump to word by label | `goto_word` |
 | `<space>m` | Matching bracket | `match_brackets` |
-| `<space>u` / `<space>o` | Find previous / next character | `find_prev_char` / `find_next_char` |
-| `<space>U` / `<space>O` | Till previous / next character | `till_prev_char` / `find_till_char` |
+| `<space>u` / `<space>o` | Move to previous / next character | `find_prev_char` / `find_next_char` |
+| `<space>U` / `<space>O` | Extend selection to previous / next character | `extend_prev_char` / `extend_next_char` |
 | `<space>j` / `<space>l` | Line start / end | `goto_line_start` / `goto_line_end` |
 | `<space>h` | First non-blank of line | `goto_first_nonwhitespace` |
 | `<space>g` / `<space>G` | File start / end | `goto_file_start` / `goto_last_line` |
@@ -111,11 +110,10 @@ U goes to the previous one, o to the next one; each row is a pair.
 | --- | ----------- | ------- |
 | `ue` / `oe` | Undo / redo | `undo` / `redo` |
 | `uh` / `oh` | Earlier / later in undo history | `earlier` / `later` |
-| `uu` / `oo` | Previous / next match (the kept fuzzy matches if there are any, otherwise the regex search) | `search_prev` / `search_next` |
-| `uU` / `oO` | Extend selection to previous / next match (same fuzzy / regex dispatch) | `extend_search_prev` / `extend_search_next` |
+| `us` / `os` | Previous / next search result (the kept fuzzy matches if there are any, otherwise the regex search) | `search_prev` / `search_next` |
 | `ud` / `od` | Previous / next diagnostic | `goto_prev_diag` / `goto_next_diag` |
 | `uD` / `oD` | First / last diagnostic | `goto_first_diag` / `goto_last_diag` |
-| `um` / `om` | Previous / next function (method) | `goto_prev_function` / `goto_next_function` |
+| `uf` / `of` | Previous / next function | `goto_prev_function` / `goto_next_function` |
 | `ua` / `oa` | Previous / next argument | `goto_prev_parameter` / `goto_next_parameter` |
 | `ut` / `ot` | Previous / next type or class | `goto_prev_class` / `goto_next_class` |
 | `uc` / `oc` | Previous / next comment | `goto_prev_comment` / `goto_next_comment` |
@@ -125,6 +123,21 @@ U goes to the previous one, o to the next one; each row is a pair.
 | `uj` / `oj` | Jumplist back / forward | `jump_backward` / `jump_forward` |
 | `ub` / `ob` | Previous / next buffer | `goto_previous_buffer` / `goto_next_buffer` |
 | `uv` / `ov` | Page up / down | `page_up` / `page_down` |
+
+### Extend Prev / Next mode
+
+The same motions as u / o, but the selection is extended by the object instead of moving the cursor.
+
+| Key | Description | Command |
+| --- | ----------- | ------- |
+| `Us` / `Os` | Extend by previous / next search result (same fuzzy / regex dispatch) | `extend_search_prev` / `extend_search_next` |
+| `Uf` / `Of` | Extend by previous / next function | `extend_goto_prev_function` / `extend_goto_next_function` |
+| `Ua` / `Oa` | Extend by previous / next argument | `extend_goto_prev_parameter` / `extend_goto_next_parameter` |
+| `Ut` / `Ot` | Extend by previous / next type or class | `extend_goto_prev_class` / `extend_goto_next_class` |
+| `Uc` / `Oc` | Extend by previous / next comment | `extend_goto_prev_comment` / `extend_goto_next_comment` |
+| `Up` / `Op` | Extend by previous / next paragraph | `extend_goto_prev_paragraph` / `extend_goto_next_paragraph` |
+| `Ud` / `Od` | Extend by previous / next diagnostic | `extend_goto_prev_diag` / `extend_goto_next_diag` |
+| `Ug` / `Og` | Extend by previous / next git change | `extend_goto_prev_change` / `extend_goto_next_change` |
 
 ### Match mode
 
@@ -145,7 +158,7 @@ Create and manipulate selections.
 | `mk` | Keep selections matching regex | `keep_selections` |
 | `mK` | Remove selections matching regex | `remove_selections` |
 | `m,` | Remove primary selection | `remove_primary_selection` |
-| `mx` | Shrink selection to line bounds | `shrink_to_line_bounds` |
+| `ml` / `mL` | Take entire lines / shrink back from line bounds | `extend_to_line_bounds` / `shrink_to_line_bounds` |
 | `mt` | Trim whitespace from selection | `trim_selections` |
 | `m=` | Align selections in columns | `align_selections` |
 | `mj` / `mJ` | Join lines / join lines with a space | `join_selections` / `join_selections_space` |
@@ -186,7 +199,7 @@ Tree-sitter nodes: i k j l = up, down, left, right in the tree.
 
 ### Window mode
 
-Splits and window focus (ijkl = up, left, down, right).
+Splits, window focus and view placement (ijkl = up, left, down, right).
 
 | Key | Description | Command |
 | --- | ----------- | ------- |
@@ -197,28 +210,19 @@ Splits and window focus (ijkl = up, left, down, right).
 | `ww` / `wt` | Rotate view / transpose view | `rotate_view` / `transpose_view` |
 | `wf` / `wF` | Open file under cursor in h / v split | `goto_file_hsplit` / `goto_file_vsplit` |
 | `wns` / `wnv` | New scratch buffer in h / v split | `hsplit_new` / `vsplit_new` |
+| `wc` / `wu` / `wd` | Center / top / bottom: put the cursor line there in the view | `align_view_center` / `align_view_top` / `align_view_bottom` |
 
-### View mode
+### Ctrl chords
 
-Scrolling and cursor line placement.
-
-| Key | Description | Command |
-| --- | ----------- | ------- |
-| `zz` / `zc` | Center cursor line vertically | `align_view_center` |
-| `zt` / `zb` | Cursor line to top / bottom of screen | `align_view_top` / `align_view_bottom` |
-| `zi` / `zk` | Scroll view up / down | `scroll_up` / `scroll_down` |
-
-### Extras mode
-
-Clipboard, comments, debugger (the leftovers of the old space menu).
+Standard editor chords: save, quit and the system clipboard.
 
 | Key | Description | Command |
 | --- | ----------- | ------- |
-| `gy` / `gY` | Yank selections / main selection to system clipboard | `yank_to_clipboard` / `yank_main_selection_to_clipboard` |
-| `gp` / `gP` | Paste system clipboard after / before | `paste_clipboard_after` / `paste_clipboard_before` |
-| `gR` | Replace selections with clipboard | `replace_selections_with_clipboard` |
-| `gc` / `gC` | Toggle comments / block comments | `toggle_comments` / `toggle_block_comments` |
-| `gd` | Debugger submenu (experimental, contents untouched) | N/A |
+| `C-s` | Save file | `save_file` |
+| `C-q` | Quit | `quit_view` |
+| `C-c` | Copy selections to the system clipboard | `yank_to_clipboard` |
+| `C-x` | Cut selections to the system clipboard | `cut_to_clipboard` |
+| `C-v` | Paste from the system clipboard | `paste_clipboard_after` |
 
 ### Single-key core
 
@@ -232,9 +236,12 @@ The high-frequency core, no prefix.
 | `I` / `K` | Half page up / down (cursor and view) | `page_cursor_half_up` / `page_cursor_half_down` |
 | `h` / `H` | Insert before selection / at line start | `insert_mode` / `insert_at_line_start` |
 | `a` / `A` | Append after selection / at line end | `append_mode` / `insert_at_line_end` |
+| `/` / `?` | Toggle comments / block comments | `toggle_comments` / `toggle_block_comments` |
+| `.` | Repeat the last command (the fork’s bindable repeat) | `repeat` |
 | `n` / `N` | Open new line below / above | `open_below` / `open_above` |
 | `v` | Select (extend) mode | `select_mode` |
-| `x` / `X` | Select line / extend to line bounds | `extend_line_below` / `extend_to_line_bounds` |
+| `x` | Select line (extends to the next line if already selected) | `extend_line_below` |
+| `+` / `-` | Increment / decrement number under cursor | `increment` / `decrement` |
 | `;` | Collapse selection onto a single cursor | `collapse_selection` |
 | `,` | Keep only primary selection | `keep_primary_selection` |
 | `%` | Select entire file | `select_all` |
@@ -247,7 +254,6 @@ The high-frequency core, no prefix.
 | `"` | Select register | `select_register` |
 | `&#124;` / `!` / `$` | Shell pipe / insert output / keep where command succeeds | `shell_pipe` / `shell_insert_output` / `shell_keep_pipe` |
 | `:` | Command mode | `command_mode` |
-| `.` | Repeat last command (including the text typed in insert mode) | `repeat` |
 
 Other keys kept from upstream:
 
@@ -259,12 +265,9 @@ Other keys kept from upstream:
 | `Ctrl-u`, `Ctrl-d`   | Move cursor and page half page up / down           | `page_cursor_half_up` / `page_cursor_half_down` |
 | `Ctrl-i`, `Tab`      | Jump forward on the jumplist                       | `jump_forward`          |
 | `Ctrl-o`             | Jump backward on the jumplist                      | `jump_backward`         |
-| `Ctrl-s`             | Save the current selection to the jumplist         | `save_selection`        |
-| `Ctrl-c`             | Toggle comments                                    | `toggle_comments`       |
-| `Ctrl-a`, `Ctrl-x`   | Increment / decrement object (number) under cursor | `increment` / `decrement` |
 | `Ctrl-z`             | Suspend Helix and return to the shell              | `suspend`               |
 
-> 💡 The fuzzy search commands `fuzzy_search_next`, `fuzzy_search_prev`, `extend_fuzzy_search_next` and `extend_fuzzy_search_prev` are unbound: `uu`, `oo`, `uU` and `oO` navigate the kept fuzzy matches (after `<space>f` and friends) and the regex search otherwise.
+> 💡 The fuzzy search commands `fuzzy_search_next`, `fuzzy_search_prev`, `extend_fuzzy_search_next` and `extend_fuzzy_search_prev` are unbound: `us`, `os`, `Us` and `Os` navigate the kept fuzzy matches (after `<space>f` and friends) and the regex search otherwise. Commands without a default key (for example `save_selection`, `find_till_char`, `till_prev_char`, `scroll_up`, `scroll_down`, `paste_clipboard_before`) can be bound in `config.toml`.
 
 ### Popups
 
@@ -365,12 +368,11 @@ Accessed by typing `v` in [normal mode](#normal-mode).
 Select mode echoes Normal mode, but changes any movements to extend
 selections rather than replace them. The word motions (`j`, `l`, `J`, `L`),
 vertical motions (`i`, `k`), the Portal jumps (`<space>u`, `<space>o`, `<space>U`,
-`<space>O`, `<space>w`, `<space>j`, `<space>l`, `<space>g`, `<space>G`) and the
-tree motions `te` and `tb` extend the selection instead of moving it.
-
-`uu` and `oo` extend the selection to the previous / next match instead of
-replacing it, so toggling this mode before pressing them makes it possible to
-keep the current selection and selectively add matches to it.
+`<space>O`, `<space>w`, `<space>j`, `<space>l`, `<space>g`, `<space>G`), the
+tree motions `te` and `tb` and the Prev / Next motions (`us`, `uf`, `ua`, `ut`,
+`uc`, `up`, `ud`, `ug` and their `o` counterparts) extend the selection instead
+of moving it. Toggling this mode before pressing `us` or `os` makes it possible
+to keep the current selection and selectively add matches to it.
 
 ## Picker
 

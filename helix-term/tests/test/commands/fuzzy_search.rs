@@ -239,7 +239,7 @@ async fn match_keys_navigate_fuzzy_then_regex_matches() -> anyhow::Result<()> {
             ab xx a_b xx ab
             ab
             "},
-        "<space>fab<ret>oo",
+        "<space>fab<ret>os",
         indoc! {"\
             xx
             ab xx #[a_b|]# xx ab
@@ -255,7 +255,7 @@ async fn match_keys_navigate_fuzzy_then_regex_matches() -> anyhow::Result<()> {
             ab xx a_b xx ab
             ab
             "},
-        "<space>fab<ret>l<space>rxx<ret>oo",
+        "<space>fab<ret>l<space>rxx<ret>os",
         indoc! {"\
             xx
             ab xx a_b #[xx|]# ab

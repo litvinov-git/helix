@@ -470,8 +470,12 @@ impl MappableCommand {
         goto_last_diag, "Goto last diagnostic",
         goto_next_diag, "Goto next diagnostic",
         goto_prev_diag, "Goto previous diagnostic",
+        extend_goto_next_diag, "Extend selection to next diagnostic",
+        extend_goto_prev_diag, "Extend selection to previous diagnostic",
         goto_next_change, "Goto next change",
         goto_prev_change, "Goto previous change",
+        extend_goto_next_change, "Extend selection to next change",
+        extend_goto_prev_change, "Extend selection to previous change",
         goto_first_change, "Goto first change",
         goto_last_change, "Goto last change",
         goto_line_start, "Goto line start",
@@ -506,6 +510,9 @@ impl MappableCommand {
         commit_undo_checkpoint, "Commit changes to new checkpoint",
         yank, "Yank selection",
         yank_to_clipboard, "Yank selections to clipboard",
+        cut_to_clipboard, "Cut selections to clipboard",
+        save_file, "Write changes to disk",
+        quit_view, "Close the current view",
         yank_to_primary_clipboard, "Yank selections to primary clipboard",
         yank_joined, "Join and yank selections",
         yank_joined_to_clipboard, "Join and yank selections to clipboard",
@@ -584,12 +591,20 @@ impl MappableCommand {
         select_textobject_inner, "Select inside object",
         goto_next_function, "Goto next function",
         goto_prev_function, "Goto previous function",
+        extend_goto_next_function, "Extend selection to next function",
+        extend_goto_prev_function, "Extend selection to previous function",
         goto_next_class, "Goto next type definition",
         goto_prev_class, "Goto previous type definition",
+        extend_goto_next_class, "Extend selection to next type definition",
+        extend_goto_prev_class, "Extend selection to previous type definition",
         goto_next_parameter, "Goto next parameter",
         goto_prev_parameter, "Goto previous parameter",
+        extend_goto_next_parameter, "Extend selection to next parameter",
+        extend_goto_prev_parameter, "Extend selection to previous parameter",
         goto_next_comment, "Goto next comment",
         goto_prev_comment, "Goto previous comment",
+        extend_goto_next_comment, "Extend selection to next comment",
+        extend_goto_prev_comment, "Extend selection to previous comment",
         goto_next_test, "Goto next test",
         goto_prev_test, "Goto previous test",
         goto_next_xml_element, "Goto next (X)HTML element",
@@ -598,6 +613,8 @@ impl MappableCommand {
         goto_prev_entry, "Goto previous pairing",
         goto_next_paragraph, "Goto next paragraph",
         goto_prev_paragraph, "Goto previous paragraph",
+        extend_goto_next_paragraph, "Extend selection to next paragraph",
+        extend_goto_prev_paragraph, "Extend selection to previous paragraph",
         dap_launch, "Launch debug target",
         dap_restart, "Restart debugging session",
         dap_toggle_breakpoint, "Toggle breakpoint",
@@ -1275,11 +1292,19 @@ fn goto_para_impl<F>(cx: &mut Context, move_fn: F)
 where
     F: Fn(RopeSlice, Range, usize, Movement) -> Range + 'static,
 {
+    let extend = cx.editor.mode == Mode::Select;
+    goto_para_extend_impl(cx, move_fn, extend)
+}
+
+fn goto_para_extend_impl<F>(cx: &mut Context, move_fn: F, extend: bool)
+where
+    F: Fn(RopeSlice, Range, usize, Movement) -> Range + 'static,
+{
     let count = cx.count();
     let motion = move |editor: &mut Editor| {
         let (view, doc) = current!(editor);
         let text = doc.text().slice(..);
-        let behavior = if editor.mode == Mode::Select {
+        let behavior = if extend {
             Movement::Extend
         } else {
             Movement::Move
@@ -1300,6 +1325,14 @@ fn goto_prev_paragraph(cx: &mut Context) {
 
 fn goto_next_paragraph(cx: &mut Context) {
     goto_para_impl(cx, movement::move_next_paragraph)
+}
+
+fn extend_goto_prev_paragraph(cx: &mut Context) {
+    goto_para_extend_impl(cx, movement::move_prev_paragraph, true)
+}
+
+fn extend_goto_next_paragraph(cx: &mut Context) {
+    goto_para_extend_impl(cx, movement::move_next_paragraph, true)
 }
 
 fn goto_file_start(cx: &mut Context) {
@@ -4611,6 +4644,15 @@ fn goto_last_diag(cx: &mut Context) {
 }
 
 fn goto_next_diag(cx: &mut Context) {
+    let extend = cx.editor.mode == Mode::Select;
+    goto_next_diag_impl(cx, extend)
+}
+
+fn extend_goto_next_diag(cx: &mut Context) {
+    goto_next_diag_impl(cx, true)
+}
+
+fn goto_next_diag_impl(cx: &mut Context, extend: bool) {
     let motion = move |editor: &mut Editor| {
         let (view, doc) = current!(editor);
 
@@ -4625,6 +4667,12 @@ fn goto_next_diag(cx: &mut Context) {
             .find(|diag| diag.range.start > cursor_pos);
 
         let selection = match diag {
+            Some(diag) if extend => {
+                let text = doc.text().slice(..);
+                doc.selection(view.id)
+                    .clone()
+                    .transform(|range| range.put_cursor(text, diag.range.end, true))
+            }
             Some(diag) => Selection::single(diag.range.start, diag.range.end),
             None => return,
         };
@@ -4638,6 +4686,15 @@ fn goto_next_diag(cx: &mut Context) {
 }
 
 fn goto_prev_diag(cx: &mut Context) {
+    let extend = cx.editor.mode == Mode::Select;
+    goto_prev_diag_impl(cx, extend)
+}
+
+fn extend_goto_prev_diag(cx: &mut Context) {
+    goto_prev_diag_impl(cx, true)
+}
+
+fn goto_prev_diag_impl(cx: &mut Context, extend: bool) {
     let motion = move |editor: &mut Editor| {
         let (view, doc) = current!(editor);
 
@@ -4653,6 +4710,12 @@ fn goto_prev_diag(cx: &mut Context) {
             .find(|diag| diag.range.start < cursor_pos);
 
         let selection = match diag {
+            Some(diag) if extend => {
+                let text = doc.text().slice(..);
+                doc.selection(view.id)
+                    .clone()
+                    .transform(|range| range.put_cursor(text, diag.range.start, true))
+            }
             // NOTE: the selection is reversed because we're jumping to the
             // previous diagnostic.
             Some(diag) => Selection::single(diag.range.end, diag.range.start),
@@ -4696,14 +4759,24 @@ fn goto_first_change_impl(cx: &mut Context, reverse: bool) {
 }
 
 fn goto_next_change(cx: &mut Context) {
-    goto_next_change_impl(cx, Direction::Forward)
+    let extend = cx.editor.mode == Mode::Select;
+    goto_next_change_impl(cx, Direction::Forward, extend)
 }
 
 fn goto_prev_change(cx: &mut Context) {
-    goto_next_change_impl(cx, Direction::Backward)
+    let extend = cx.editor.mode == Mode::Select;
+    goto_next_change_impl(cx, Direction::Backward, extend)
 }
 
-fn goto_next_change_impl(cx: &mut Context, direction: Direction) {
+fn extend_goto_next_change(cx: &mut Context) {
+    goto_next_change_impl(cx, Direction::Forward, true)
+}
+
+fn extend_goto_prev_change(cx: &mut Context) {
+    goto_next_change_impl(cx, Direction::Backward, true)
+}
+
+fn goto_next_change_impl(cx: &mut Context, direction: Direction, extend: bool) {
     let count = cx.count() as u32 - 1;
     let motion = move |editor: &mut Editor| {
         let (view, doc) = current!(editor);
@@ -4732,7 +4805,7 @@ fn goto_next_change_impl(cx: &mut Context, direction: Direction) {
             };
             let hunk = diff.nth_hunk(hunk_idx);
             let new_range = hunk_range(hunk, doc_text);
-            if editor.mode == Mode::Select {
+            if extend {
                 let head = if new_range.head < range.anchor {
                     new_range.anchor
                 } else {
@@ -5278,6 +5351,25 @@ fn yank(cx: &mut Context) {
 fn yank_to_clipboard(cx: &mut Context) {
     yank_impl(cx.editor, '+');
     exit_select_mode(cx);
+}
+
+fn cut_to_clipboard(cx: &mut Context) {
+    yank_impl(cx.editor, '+');
+    delete_selection_noyank(cx);
+}
+
+fn save_file(cx: &mut Context) {
+    run_typable(cx, ":write");
+}
+
+fn quit_view(cx: &mut Context) {
+    run_typable(cx, ":quit");
+}
+
+fn run_typable(cx: &mut Context, command: &str) {
+    if let Ok(command) = command.parse::<MappableCommand>() {
+        command.execute(cx);
+    }
 }
 
 fn yank_to_primary_clipboard(cx: &mut Context) {
@@ -6615,6 +6707,16 @@ fn scroll_down(cx: &mut Context) {
 }
 
 fn goto_ts_object_impl(cx: &mut Context, object: &'static str, direction: Direction) {
+    let extend = cx.editor.mode == Mode::Select;
+    goto_ts_object_extend_impl(cx, object, direction, extend)
+}
+
+fn goto_ts_object_extend_impl(
+    cx: &mut Context,
+    object: &'static str,
+    direction: Direction,
+    extend: bool,
+) {
     let count = cx.count();
     let motion = move |editor: &mut Editor| {
         let (view, doc) = current!(editor);
@@ -6627,7 +6729,7 @@ fn goto_ts_object_impl(cx: &mut Context, object: &'static str, direction: Direct
                     text, range, object, direction, syntax, &loader, count,
                 );
 
-                if editor.mode == Mode::Select {
+                if extend {
                     let head = if new_range.head < range.anchor {
                         new_range.anchor
                     } else {
@@ -6679,6 +6781,38 @@ fn goto_next_comment(cx: &mut Context) {
 
 fn goto_prev_comment(cx: &mut Context) {
     goto_ts_object_impl(cx, "comment", Direction::Backward)
+}
+
+fn extend_goto_next_function(cx: &mut Context) {
+    goto_ts_object_extend_impl(cx, "function", Direction::Forward, true)
+}
+
+fn extend_goto_prev_function(cx: &mut Context) {
+    goto_ts_object_extend_impl(cx, "function", Direction::Backward, true)
+}
+
+fn extend_goto_next_class(cx: &mut Context) {
+    goto_ts_object_extend_impl(cx, "class", Direction::Forward, true)
+}
+
+fn extend_goto_prev_class(cx: &mut Context) {
+    goto_ts_object_extend_impl(cx, "class", Direction::Backward, true)
+}
+
+fn extend_goto_next_parameter(cx: &mut Context) {
+    goto_ts_object_extend_impl(cx, "parameter", Direction::Forward, true)
+}
+
+fn extend_goto_prev_parameter(cx: &mut Context) {
+    goto_ts_object_extend_impl(cx, "parameter", Direction::Backward, true)
+}
+
+fn extend_goto_next_comment(cx: &mut Context) {
+    goto_ts_object_extend_impl(cx, "comment", Direction::Forward, true)
+}
+
+fn extend_goto_prev_comment(cx: &mut Context) {
+    goto_ts_object_extend_impl(cx, "comment", Direction::Backward, true)
 }
 
 fn goto_next_test(cx: &mut Context) {

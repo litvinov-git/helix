@@ -140,7 +140,7 @@ async fn test_changes_in_splits_apply_to_all_views() -> anyhow::Result<()> {
     //                Both views look at the same doc.
     // * n<esc>       Add a line ending to the end of the document.
     //                The cursor is now at line 2 in window 2.
-    // * <C-s>        Save that selection to the jumplist in window 2.
+    // * <A-s>        Save that selection to the jumplist in window 2.
     // * ww           Switch to window 1.
     // * id           Delete line 1 in window 1.
     // * wq           Close window 1, focusing window 2.
@@ -148,9 +148,9 @@ async fn test_changes_in_splits_apply_to_all_views() -> anyhow::Result<()> {
     //
     // This panicked in the past because the jumplist entry on line 2 of window 2
     // was not updated and after the `id` step, pointed outside of the document.
-    test((
+    test_extra_keys((
         "#[|]#",
-        "wvn<esc><C-s>wwidwqd",
+        "wvn<esc><A-s>wwidwqd",
         "#[|]#",
         LineFeedHandling::AsIs,
     ))
@@ -159,7 +159,7 @@ async fn test_changes_in_splits_apply_to_all_views() -> anyhow::Result<()> {
     // Transactions are applied to the views for windows lazily when they are focused.
     // This case panics if the transactions and inversions are not applied in the
     // correct order as we switch between windows.
-    test((
+    test_extra_keys((
         "#[|]#",
         "n<esc>n<esc>n<esc>wvueueuewwoeoeoewqueueue",
         "#[\n|]#",
@@ -175,7 +175,7 @@ async fn test_changes_in_splits_apply_to_all_views() -> anyhow::Result<()> {
     // panics.
     // The key sequence:
     // * n<esc> x3     Create three empty lines so we are at the end of the document.
-    // * wv<C-s>      Create a split and save that point at the end of the document
+    // * wv<A-s>      Create a split and save that point at the end of the document
     //                in the jumplist.
     // * ww           Switch back to the first window.
     // * ueue         Undo twice (not three times which would bring us back to the
@@ -185,9 +185,9 @@ async fn test_changes_in_splits_apply_to_all_views() -> anyhow::Result<()> {
     // * wq           Close window 1, focusing window 2 and causing a sync. This step
     //                panics if we don't apply in the right order.
     // * %d           Clean up the buffer.
-    test((
+    test_extra_keys((
         "#[|]#",
-        "n<esc>n<esc>n<esc>wv<C-s>wwueuen<esc>n<esc>n<esc>wq%d",
+        "n<esc>n<esc>n<esc>wv<A-s>wwueuen<esc>n<esc>n<esc>wq%d",
         "#[|]#",
         LineFeedHandling::AsIs,
     ))

@@ -455,7 +455,7 @@ async fn select_mode_tree_sitter_next_function_is_union_of_objects() -> anyhow::
                 /// Decrements
                 fn dec(x: usize) -> usize { x - 1 }
             "},
-            "omvom",
+            "ofvof",
             indoc! {"\
                 /// Increments
                 #[fn inc(x: usize) -> usize { x + 1 }
@@ -480,7 +480,7 @@ async fn select_mode_tree_sitter_prev_function_unselects_object() -> anyhow::Res
                 /// Decrements
                 fn dec(x: usize) -> usize { x - 1 }|]#
             "},
-            "vum",
+            "vuf",
             indoc! {"\
                 /// Increments
                 #[fn inc(x: usize) -> usize { x + 1 }|]#
@@ -508,7 +508,7 @@ async fn select_mode_tree_sitter_prev_function_goes_backwards_to_object() -> any
                 /// Identity
                 #[fn ident(x: usize) -> usize { x }|]#
             "},
-            "vum",
+            "vuf",
             indoc! {"\
                 /// Increments
                 fn inc(x: usize) -> usize { x + 1 }
@@ -532,7 +532,7 @@ async fn select_mode_tree_sitter_prev_function_goes_backwards_to_object() -> any
                 /// Identity
                 #[fn ident(x: usize) -> usize { x }|]#
             "},
-            "vumum",
+            "vufuf",
             indoc! {"\
                 /// Increments
                 #[|fn inc(x: usize) -> usize { x + 1 }
@@ -556,12 +556,12 @@ async fn find_char() -> anyhow::Result<()> {
     test(("he#[l|]#lo\nhello", "2<space>ol", "he#[llo\nhel|]#lo")).await?;
     test(("#[h|]#ello\nhello", "9<space>ol", "#[h|]#ello\nhello")).await?;
 
-    test(("h#[e|]#llo\nhello", "<space>Ol", "h#[el|]#lo\nhello")).await?;
-    test(("he#[l|]#lo\nhello", "<space>Ol", "he#[llo\nhe|]#llo")).await?;
-    test(("hel#[l|]#o\nhello", "<space>Ol", "hel#[lo\nhe|]#llo")).await?;
-    test(("hel#[l|]#o\nhello", "<space>Ox", "hel#[l|]#o\nhello")).await?;
-    test(("he#[l|]#lo\nhello", "2<space>Ol", "he#[llo\nhel|]#lo")).await?;
-    test(("#[h|]#ello\nhello", "9<space>Ol", "#[h|]#ello\nhello")).await?;
+    test_extra_keys(("h#[e|]#llo\nhello", "<A-t>l", "h#[el|]#lo\nhello")).await?;
+    test_extra_keys(("he#[l|]#lo\nhello", "<A-t>l", "he#[llo\nhe|]#llo")).await?;
+    test_extra_keys(("hel#[l|]#o\nhello", "<A-t>l", "hel#[lo\nhe|]#llo")).await?;
+    test_extra_keys(("hel#[l|]#o\nhello", "<A-t>x", "hel#[l|]#o\nhello")).await?;
+    test_extra_keys(("he#[l|]#lo\nhello", "2<A-t>l", "he#[llo\nhel|]#lo")).await?;
+    test_extra_keys(("#[h|]#ello\nhello", "9<A-t>l", "#[h|]#ello\nhello")).await?;
 
     test(("hello\nhel#[l|]#o", "<space>ul", "hello\nhe#[|ll]#o")).await?;
     test(("hello\nhe#[l|]#lo", "<space>ul", "hel#[|lo\nhel]#lo")).await?;
@@ -569,107 +569,107 @@ async fn find_char() -> anyhow::Result<()> {
     test(("hello\nhel#[l|]#o", "2<space>ul", "hel#[|lo\nhell]#o")).await?;
     test(("hello\nhell#[o|]#", "9<space>ul", "hello\nhell#[o|]#")).await?;
 
-    test(("hello\nhell#[o|]#", "<space>Ul", "hello\nhel#[|lo]#")).await?;
-    test(("hello\nhel#[l|]#o", "<space>Ul", "hell#[|o\nhell]#o")).await?;
-    test(("hello\nhe#[l|]#lo", "<space>Ul", "hell#[|o\nhel]#lo")).await?;
-    test(("hello\n#[h|]#ello", "<space>Ux", "hello\n#[h|]#ello")).await?;
-    test(("hello\nhel#[l|]#o", "2<space>Ul", "hel#[|lo\nhell]#o")).await?;
-    test(("hello\nhell#[o|]#", "9<space>Ul", "hello\nhell#[o|]#")).await?;
+    test_extra_keys(("hello\nhell#[o|]#", "<A-T>l", "hello\nhel#[|lo]#")).await?;
+    test_extra_keys(("hello\nhel#[l|]#o", "<A-T>l", "hell#[|o\nhell]#o")).await?;
+    test_extra_keys(("hello\nhe#[l|]#lo", "<A-T>l", "hell#[|o\nhel]#lo")).await?;
+    test_extra_keys(("hello\n#[h|]#ello", "<A-T>x", "hello\n#[h|]#ello")).await?;
+    test_extra_keys(("hello\nhel#[l|]#o", "2<A-T>l", "hel#[|lo\nhell]#o")).await?;
+    test_extra_keys(("hello\nhell#[o|]#", "9<A-T>l", "hello\nhell#[o|]#")).await?;
 
     Ok(())
 }
 
 #[tokio::test(flavor = "multi_thread")]
 async fn find_char_line_ending() -> anyhow::Result<()> {
-    test(("on#[e|]#\ntwo\n", "<space>o<ret>", "on#[e\n|]#two\n")).await?;
-    test(("one#[\n|]#two\n", "<space>o<ret>", "one#[\ntwo\n|]#")).await?;
-    test(("one\n#[t|]#wo\n", "<space>o<ret>", "one\n#[two\n|]#")).await?;
-    test(("one#[\n|]#", "<space>o<ret>", "one#[\n|]#")).await?;
-    test(("#[o|]#ne\ntwo\n", "2<space>o<ret>", "#[one\ntwo\n|]#")).await?;
-    test(("#[o|]#ne\ntwo\n", "9<space>o<ret>", "#[o|]#ne\ntwo\n")).await?;
+    test_extra_keys(("on#[e|]#\ntwo\n", "<space>o<ret>", "on#[e\n|]#two\n")).await?;
+    test_extra_keys(("one#[\n|]#two\n", "<space>o<ret>", "one#[\ntwo\n|]#")).await?;
+    test_extra_keys(("one\n#[t|]#wo\n", "<space>o<ret>", "one\n#[two\n|]#")).await?;
+    test_extra_keys(("one#[\n|]#", "<space>o<ret>", "one#[\n|]#")).await?;
+    test_extra_keys(("#[o|]#ne\ntwo\n", "2<space>o<ret>", "#[one\ntwo\n|]#")).await?;
+    test_extra_keys(("#[o|]#ne\ntwo\n", "9<space>o<ret>", "#[o|]#ne\ntwo\n")).await?;
 
-    test(("o#[n|]#e\ntwo\n", "<space>O<ret>", "o#[ne|]#\ntwo\n")).await?;
-    test(("on#[e|]#\ntwo\n", "<space>O<ret>", "on#[e\ntwo|]#\n")).await?;
-    test(("one#[\n|]#two\n", "<space>O<ret>", "one#[\ntwo|]#\n")).await?;
-    test(("one#[\n|]#", "<space>O<ret>", "one#[\n|]#")).await?;
-    test(("on#[e|]#\n", "<space>O<ret>", "on#[e|]#\n")).await?;
-    test(("#[o|]#ne\ntwo\n", "2<space>O<ret>", "#[one\ntwo|]#\n")).await?;
-    test(("#[o|]#ne\ntwo\n", "9<space>O<ret>", "#[o|]#ne\ntwo\n")).await?;
+    test_extra_keys(("o#[n|]#e\ntwo\n", "<A-t><ret>", "o#[ne|]#\ntwo\n")).await?;
+    test_extra_keys(("on#[e|]#\ntwo\n", "<A-t><ret>", "on#[e\ntwo|]#\n")).await?;
+    test_extra_keys(("one#[\n|]#two\n", "<A-t><ret>", "one#[\ntwo|]#\n")).await?;
+    test_extra_keys(("one#[\n|]#", "<A-t><ret>", "one#[\n|]#")).await?;
+    test_extra_keys(("on#[e|]#\n", "<A-t><ret>", "on#[e|]#\n")).await?;
+    test_extra_keys(("#[o|]#ne\ntwo\n", "2<A-t><ret>", "#[one\ntwo|]#\n")).await?;
+    test_extra_keys(("#[o|]#ne\ntwo\n", "9<A-t><ret>", "#[o|]#ne\ntwo\n")).await?;
 
-    test((
+    test_extra_keys((
         "one\ntwo\n#[t|]#hree\n",
         "<space>u<ret>",
         "one\ntwo#[|\nt]#hree\n",
     ))
     .await?;
-    test((
+    test_extra_keys((
         "one\ntwo#[\n|]#three\n",
         "<space>u<ret>",
         "one#[|\ntwo\n]#three\n",
     ))
     .await?;
-    test((
+    test_extra_keys((
         "one\ntw#[o|]#\nthree\n",
         "<space>u<ret>",
         "one#[|\ntwo]#\nthree\n",
     ))
     .await?;
-    test(("o#[n|]#e\n", "<space>u<ret>", "o#[n|]#e\n")).await?;
-    test(("#[o|]#ne\n", "<space>u<ret>", "#[o|]#ne\n")).await?;
-    test((
+    test_extra_keys(("o#[n|]#e\n", "<space>u<ret>", "o#[n|]#e\n")).await?;
+    test_extra_keys(("#[o|]#ne\n", "<space>u<ret>", "#[o|]#ne\n")).await?;
+    test_extra_keys((
         "one\ntwo\nth#[r|]#ee\n",
         "2<space>u\n",
         "one#[|\ntwo\nthr]#ee\n",
     ))
     .await?;
-    test((
+    test_extra_keys((
         "one\ntwo\nth#[r|]#ee\n",
         "9<space>u\n",
         "one\ntwo\nth#[r|]#ee\n",
     ))
     .await?;
 
-    test((
+    test_extra_keys((
         "one\ntwo\nth#[r|]#ee\n",
-        "<space>U<ret>",
+        "<A-T><ret>",
         "one\ntwo\n#[|thr]#ee\n",
     ))
     .await?;
-    test((
+    test_extra_keys((
         "one\ntwo\n#[t|]#hree\n",
-        "<space>U<ret>",
+        "<A-T><ret>",
         "one\n#[|two\nt]#hree\n",
     ))
     .await?;
-    test((
+    test_extra_keys((
         "one\ntwo#[\n|]#three\n",
-        "<space>U<ret>",
+        "<A-T><ret>",
         "one\n#[|two\n]#three\n",
     ))
     .await?;
-    test(("o#[n|]#e\n", "<space>U<ret>", "o#[n|]#e\n")).await?;
-    test(("#[o|]#ne\n", "<space>U<ret>", "#[o|]#ne\n")).await?;
-    test((
+    test_extra_keys(("o#[n|]#e\n", "<A-T><ret>", "o#[n|]#e\n")).await?;
+    test_extra_keys(("#[o|]#ne\n", "<A-T><ret>", "#[o|]#ne\n")).await?;
+    test_extra_keys((
         "one\ntwo\nth#[r|]#ee\n",
-        "2<space>U\n",
+        "2<A-T>\n",
         "one\n#[|two\nthr]#ee\n",
     ))
     .await?;
-    test((
+    test_extra_keys((
         "one\ntwo\nth#[r|]#ee\n",
-        "9<space>U\n",
+        "9<A-T>\n",
         "one\ntwo\nth#[r|]#ee\n",
     ))
     .await?;
 
-    test((
+    test_extra_keys((
         indoc! {
             "\
             one
             #[|t]#wo
             three"
         },
-        "<space>U<ret><space>l<right>2<space>o<ret>",
+        "<A-T><ret><space>l<right>2<space>o<ret>",
         indoc! {
             "\
             one
@@ -679,14 +679,14 @@ async fn find_char_line_ending() -> anyhow::Result<()> {
     ))
     .await?;
 
-    test((
+    test_extra_keys((
         indoc! {
             "\
             #[|o]#ne
             two
             three"
         },
-        "<space>o<ret>2<space>O<ret><space>j<space>U<ret><space>u<ret>",
+        "<space>o<ret>2<A-t><ret><space>j<A-T><ret><space>u<ret>",
         indoc! {
             "\
             one#[|
@@ -901,7 +901,7 @@ async fn search_abort_after_async_edit() -> anyhow::Result<()> {
             .build()?,
         vec![
             (
-                Some("/"),
+                Some("<space>r"),
                 Some(&|_| {
                     // Simulate a formatter changing the document while the search prompt is open.
                     helix_term::job::dispatch_blocking(|editor, _| {
