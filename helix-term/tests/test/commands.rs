@@ -280,9 +280,9 @@ async fn test_multi_selection_shell_commands() -> anyhow::Result<()> {
 async fn test_undo_redo() -> anyhow::Result<()> {
     // A jumplist selection is created at a point which is undone.
     //
-    // * 2[<space>   Add two newlines at line start. We're now on line 3.
+    // * n<esc> (twice) Add two newlines. We're now on line 3.
     // * <C-s>       Save the selection on line 3 in the jumplist.
-    // * u           Undo the two newlines. We're now on line 1.
+    // * ue (twice)  Undo the two newlines. We're now on line 1.
     // * <C-o><C-i>  Jump forward an back again in the jumplist. This would panic
     //               if the jumplist were not being updated correctly.
     test((
@@ -295,10 +295,10 @@ async fn test_undo_redo() -> anyhow::Result<()> {
 
     // A jumplist selection is passed through an edit and then an undo and then a redo.
     //
-    // * [<space>    Add a newline at line start. We're now on line 2.
+    // * n<esc>       Add a newline. We're now on line 2.
     // * <C-s>       Save the selection on line 2 in the jumplist.
-    // * kd          Delete line 1. The jumplist selection should be adjusted to the new line 1.
-    // * uU          Undo and redo the `kd` edit.
+    // * id          Delete line 1. The jumplist selection should be adjusted to the new line 1.
+    // * ueoe        Undo and redo the `id` edit.
     // * <C-o>       Jump back in the jumplist. This would panic if the jumplist were not being
     //               updated correctly.
     // * <C-i>       Jump forward to line 1.

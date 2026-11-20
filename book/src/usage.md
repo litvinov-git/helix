@@ -29,5 +29,5 @@ Also inspired by Kakoune, multiple selections are a core mode of interaction in 
 
 ## Motions
 
-Motions are commands that move the cursor or modify selections. They're used for navigation and text manipulation. Examples include `w` to move to the next word, or `f` to find a character. See the [Movement](./keymap.md#movement) section of the keymap for more motions.
+Motions are commands that move the cursor or modify selections. They're used for navigation and text manipulation. Examples include `w` to move to the next word, or `f` to find a character. See the [Movement](./keymap.md#single-key-core) section of the keymap for more motions.
 
