@@ -18,7 +18,7 @@ async fn search_selection_detect_word_boundaries_at_eof() -> anyhow::Result<()> 
             #[o|]#ne
             two
             three"},
-        "gej*h",
+        "<space>Gk*<left>",
         indoc! {"\
             one
             two
@@ -39,7 +39,7 @@ async fn test_selection_duplication() -> anyhow::Result<()> {
             ipsum
             dolor
             "},
-        "CC",
+        "mcmc",
         indoc! {"\
             #(lo|)#rem
             #(ip|)#sum
@@ -55,7 +55,7 @@ async fn test_selection_duplication() -> anyhow::Result<()> {
             ipsum
             dolor
             "},
-        "CC",
+        "mcmc",
         indoc! {"\
             #(|lo)#rem
             #(|ip)#sum
@@ -70,7 +70,7 @@ async fn test_selection_duplication() -> anyhow::Result<()> {
             test
             #[testitem|]#
             "},
-        "<A-C>",
+        "mC",
         indoc! {"\
             test
             #[testitem|]#
@@ -84,7 +84,7 @@ async fn test_selection_duplication() -> anyhow::Result<()> {
             test
             #[test|]#
             "},
-        "<A-C>",
+        "mC",
         indoc! {"\
             #[test|]#
             #(test|)#
@@ -98,7 +98,7 @@ async fn test_selection_duplication() -> anyhow::Result<()> {
             #[testitem|]#
             test
             "},
-        "C",
+        "mc",
         indoc! {"\
             #[testitem|]#
             test
@@ -112,7 +112,7 @@ async fn test_selection_duplication() -> anyhow::Result<()> {
             #[test|]#
             test
             "},
-        "C",
+        "mc",
         indoc! {"\
             #(test|)#
             #[test|]#
@@ -137,7 +137,7 @@ async fn test_goto_file_impl() -> anyhow::Result<()> {
     // Single selection
     test_key_sequence(
         &mut AppBuilder::new().with_file(file.path(), None).build()?,
-        Some("ione.js<esc>%gf"),
+        Some("hone.js<esc>%<space>p"),
         Some(&|app| {
             assert_eq!(1, match_paths(app, vec!["one.js"]));
         }),
@@ -148,7 +148,7 @@ async fn test_goto_file_impl() -> anyhow::Result<()> {
     // Multiple selection
     test_key_sequence(
         &mut AppBuilder::new().with_file(file.path(), None).build()?,
-        Some("ione.js<ret>two.js<esc>%<A-s>gf"),
+        Some("hone.js<ret>two.js<esc>%mn<space>p"),
         Some(&|app| {
             assert_eq!(2, match_paths(app, vec!["one.js", "two.js"]));
         }),
@@ -159,7 +159,7 @@ async fn test_goto_file_impl() -> anyhow::Result<()> {
     // Cursor on first quote
     test_key_sequence(
         &mut AppBuilder::new().with_file(file.path(), None).build()?,
-        Some("iimport 'one.js'<esc>B;gf"),
+        Some("himport 'one.js'<esc>J;<space>p"),
         Some(&|app| {
             assert_eq!(1, match_paths(app, vec!["one.js"]));
         }),
@@ -170,7 +170,7 @@ async fn test_goto_file_impl() -> anyhow::Result<()> {
     // Cursor on last quote
     test_key_sequence(
         &mut AppBuilder::new().with_file(file.path(), None).build()?,
-        Some("iimport 'one.js'<esc>bgf"),
+        Some("himport 'one.js'<esc>j<space>p"),
         Some(&|app| {
             assert_eq!(1, match_paths(app, vec!["one.js"]));
         }),
@@ -181,7 +181,7 @@ async fn test_goto_file_impl() -> anyhow::Result<()> {
     // ';' is behind the path
     test_key_sequence(
         &mut AppBuilder::new().with_file(file.path(), None).build()?,
-        Some("iimport 'one.js';<esc>B;gf"),
+        Some("himport 'one.js';<esc>J;<space>p"),
         Some(&|app| {
             assert_eq!(1, match_paths(app, vec!["one.js"]));
         }),
@@ -192,7 +192,7 @@ async fn test_goto_file_impl() -> anyhow::Result<()> {
     // allow numeric values in path
     test_key_sequence(
         &mut AppBuilder::new().with_file(file.path(), None).build()?,
-        Some("iimport 'one123.js'<esc>B;gf"),
+        Some("himport 'one123.js'<esc>J;<space>p"),
         Some(&|app| {
             assert_eq!(1, match_paths(app, vec!["one123.js"]));
         }),
@@ -264,7 +264,7 @@ async fn test_multi_selection_shell_commands() -> anyhow::Result<()> {
             #(|ipsum)#
             #(|dolor)#
             "},
-        "<A-!>echo foo<ret>",
+        ":append-output echo foo<ret>",
         indoc! {"\
             lorem#[|foo]#
             ipsum#(|foo)#
@@ -287,8 +287,8 @@ async fn test_undo_redo() -> anyhow::Result<()> {
     //               if the jumplist were not being updated correctly.
     test((
         "#[|]#",
-        "2[<space><C-s>u<C-o><C-i>",
-        "#[|]#",
+        "n<esc>n<esc><C-s>ueue<C-o><C-i>",
+        "#[\n|]#",
         LineFeedHandling::AsIs,
     ))
     .await?;
@@ -304,7 +304,7 @@ async fn test_undo_redo() -> anyhow::Result<()> {
     // * <C-i>       Jump forward to line 1.
     test((
         "#[|]#",
-        "[<space><C-s>kduU<C-o><C-i>",
+        "n<esc><C-s>idueoe<C-o><C-i>",
         "#[|]#",
         LineFeedHandling::AsIs,
     ))
@@ -313,8 +313,8 @@ async fn test_undo_redo() -> anyhow::Result<()> {
     // In this case we 'redo' manually to ensure that the transactions are composing correctly.
     test((
         "#[|]#",
-        "[<space>u[<space>u",
-        "#[|]#",
+        "n<esc>uen<esc>ue",
+        "#[\n|]#",
         LineFeedHandling::AsIs,
     ))
     .await?;
@@ -366,7 +366,7 @@ async fn test_character_info() -> anyhow::Result<()> {
     // UTF-8, single byte
     test_key_sequence(
         &mut helpers::AppBuilder::new().build()?,
-        Some("ih<esc>h:char<ret>"),
+        Some("hh<esc><left>:char<ret>"),
         Some(&|app| {
             assert_eq!(
                 r#""h" (U+0068) Dec 104 Hex 68"#,
@@ -380,7 +380,7 @@ async fn test_character_info() -> anyhow::Result<()> {
     // UTF-8, multi-byte
     test_key_sequence(
         &mut helpers::AppBuilder::new().build()?,
-        Some("ië<esc>h:char<ret>"),
+        Some("hë<esc><left>:char<ret>"),
         Some(&|app| {
             assert_eq!(
                 r#""ë" (U+0065 U+0308) Hex 65 + cc 88"#,
@@ -408,7 +408,7 @@ async fn test_character_info() -> anyhow::Result<()> {
     // Non-UTF-8
     test_key_sequence(
         &mut helpers::AppBuilder::new().build()?,
-        Some(":encoding ascii<ret>ih<esc>h:char<ret>"),
+        Some(":encoding ascii<ret>hh<esc><left>:char<ret>"),
         Some(&|app| {
             assert_eq!(r#""h" Dec 104 Hex 68"#, app.editor.get_status().unwrap().0);
         }),
@@ -425,7 +425,7 @@ async fn test_delete_char_backward() -> anyhow::Result<()> {
     test(("#(x|)# #[x|]#", "c<space><backspace><esc>", "#[\n|]#")).await?;
     test((
         "#( |)##( |)#a#( |)#axx#[x|]#a",
-        "li<backspace><esc>",
+        "<right>h<backspace><esc>",
         "#(a|)##(|a)#xx#[|a]#",
     ))
     .await?;
@@ -467,7 +467,7 @@ async fn test_delete_word_backward() -> anyhow::Result<()> {
 #[tokio::test(flavor = "multi_thread")]
 async fn test_delete_word_forward() -> anyhow::Result<()> {
     // don't panic when deleting overlapping ranges
-    test(("fo#[o|]#b#(|ar)#", "i<A-d><esc>", "fo#[\n|]#")).await?;
+    test(("fo#[o|]#b#(|ar)#", "h<A-d><esc>", "fo#[\n|]#")).await?;
     Ok(())
 }
 
@@ -512,7 +512,7 @@ async fn test_insert_with_indent() -> anyhow::Result<()> {
     // insert_at_line_start
     test((
         INPUT,
-        ":lang rust<ret>%<A-s>I",
+        ":lang rust<ret>%mnH",
         indoc! { "
             #[f|]#n foo() {
                 #(i|)#f let Some(_) = None {
@@ -532,7 +532,7 @@ async fn test_insert_with_indent() -> anyhow::Result<()> {
     // insert_at_line_end
     test((
         INPUT,
-        ":lang rust<ret>%<A-s>A",
+        ":lang rust<ret>%mnA",
         indoc! { "
             fn foo() {#[\n|]#
                 if let Some(_) = None {#(\n|)#
@@ -561,7 +561,7 @@ async fn test_open_below_at_block_end_stays_in_block() -> anyhow::Result<()> {
             z = 2
             "
         },
-        ":lang python<ret>ox<esc>",
+        ":lang python<ret>nx<esc>",
         indoc! { "\
             def f():
                 y = 1
@@ -577,7 +577,7 @@ async fn test_open_below_at_block_end_stays_in_block() -> anyhow::Result<()> {
             def f():
                 #[y|]# = 1"
         },
-        ":lang python<ret>ox<esc>",
+        ":lang python<ret>nx<esc>",
         indoc! { "\
             def f():
                 y = 1
@@ -593,7 +593,7 @@ async fn test_open_below_at_block_end_stays_in_block() -> anyhow::Result<()> {
             def f():
                 #[r|]#eturn 1"
         },
-        ":lang python<ret>ox<esc>",
+        ":lang python<ret>nx<esc>",
         indoc! { "\
             def f():
                 return 1
@@ -608,7 +608,7 @@ async fn test_open_below_at_block_end_stays_in_block() -> anyhow::Result<()> {
             a:
               #[b|]#: 1"
         },
-        ":lang yaml<ret>ox<esc>",
+        ":lang yaml<ret>nx<esc>",
         indoc! { "\
             a:
               b: 1
@@ -625,7 +625,7 @@ async fn test_open_below_at_block_end_stays_in_block() -> anyhow::Result<()> {
               #[p|]#uts \"a\"
             end"
         },
-        ":lang crystal<ret>ox<esc>",
+        ":lang crystal<ret>nx<esc>",
         indoc! { "\
             if x
               puts \"a\"
@@ -637,7 +637,7 @@ async fn test_open_below_at_block_end_stays_in_block() -> anyhow::Result<()> {
 
     test((
         "def f():\n    #[y|]# = 1  ",
-        ":lang python<ret>ox<esc>",
+        ":lang python<ret>nx<esc>",
         "def f():\n    y = 1  \n    x#[\n|]#",
     ))
     .await?;
@@ -650,7 +650,7 @@ async fn test_open_below_at_block_end_stays_in_block() -> anyhow::Result<()> {
         AppBuilder::new().with_config(config.clone()),
         (
             "a:\n  b: 1\n#[#|]# c\nz: 2\n",
-            ":lang yaml<ret>ox<esc>",
+            ":lang yaml<ret>nx<esc>",
             "a:\n  b: 1\n# c\nx#[\n|]#z: 2\n",
         ),
     )
@@ -659,7 +659,7 @@ async fn test_open_below_at_block_end_stays_in_block() -> anyhow::Result<()> {
     // `@extend` must not stretch a node that closes on the cursor line.
     test((
         "#[f|]#oo := \"bar\"\nbaz := 1\n",
-        ":lang just<ret>ox<esc>",
+        ":lang just<ret>nx<esc>",
         "foo := \"bar\"\nx#[\n|]#baz := 1\n",
     ))
     .await?;
@@ -669,7 +669,7 @@ async fn test_open_below_at_block_end_stays_in_block() -> anyhow::Result<()> {
         AppBuilder::new().with_config(config.clone()),
         (
             "#[i|]#f (x) // c\n    foo();\n",
-            ":lang c<ret>ox<esc>",
+            ":lang c<ret>nx<esc>",
             "if (x) // c\n    x#[\n|]#    foo();\n",
         ),
     )
@@ -686,7 +686,7 @@ async fn test_join_selections() -> anyhow::Result<()> {
             #[a|]#bc
             def
         "},
-        "J",
+        "mj",
         indoc! {"\
             #[a|]#bc def
         "},
@@ -700,7 +700,7 @@ async fn test_join_selections() -> anyhow::Result<()> {
 
             def
         "},
-        "JJ",
+        "mjmj",
         indoc! {"\
             #[a|]#bc def
         "},
@@ -714,7 +714,7 @@ async fn test_join_selections() -> anyhow::Result<()> {
 
                 def
         "},
-        "JJ",
+        "mjmj",
         indoc! {"\
             #[a|]#bc def
         "},
@@ -739,7 +739,7 @@ async fn test_join_selections_space() -> anyhow::Result<()> {
 
             e|]#
         "},
-        "<A-J>",
+        "mJ",
         indoc! {"\
             a#[ |]#b#( |)#c#( |)#d#( |)#e
         "},
@@ -752,7 +752,7 @@ async fn test_join_selections_space() -> anyhow::Result<()> {
             #[a|]#bc
             def
         "},
-        "<A-J>",
+        "mJ",
         indoc! {"\
             abc#[ |]#def
         "},
@@ -766,7 +766,7 @@ async fn test_join_selections_space() -> anyhow::Result<()> {
 
             def
         "},
-        "<A-J>",
+        "mJ",
         indoc! {"\
             #[a|]#bc
             def
@@ -781,7 +781,7 @@ async fn test_join_selections_space() -> anyhow::Result<()> {
 
                 def
         "},
-        "<A-J><A-J>",
+        "mJmJ",
         indoc! {"\
             abc#[ |]#def
         "},
@@ -797,7 +797,7 @@ async fn test_join_selections_space() -> anyhow::Result<()> {
 
             c |]#
         "},
-        "<A-J>",
+        "mJ",
         indoc! {"\
             aaa   #[ |]#bb  #( |)#c 
         "},
@@ -814,7 +814,7 @@ async fn test_join_selections_comment() -> anyhow::Result<()> {
             /// #[a|]#bc
             /// def
         "},
-        ":lang rust<ret>J",
+        ":lang rust<ret>mj",
         indoc! {"\
             /// #[a|]#bc def
         "},
@@ -832,7 +832,7 @@ async fn test_join_selections_comment() -> anyhow::Result<()> {
             /// f
             // g]#
         "},
-        ":lang rust<ret>J",
+        ":lang rust<ret>mj",
         indoc! {"\
             #[| // a b /// c d e f // g]#
         "},
@@ -842,7 +842,7 @@ async fn test_join_selections_comment() -> anyhow::Result<()> {
     test((
         "#[|\t// Join comments
 \t// with indent]#",
-        ":lang go<ret>J",
+        ":lang go<ret>mj",
         "#[|\t// Join comments with indent]#",
     ))
     .await?;
@@ -953,7 +953,7 @@ fn foo() {
 "#;
     test((
         INPUT,
-        ":lang rust<ret>mrm'",
+        ":lang rust<ret>mSm'",
         r#"\
 fn foo() {
     if let Some(_) = None {
@@ -966,7 +966,7 @@ fn foo() {
 
     test((
         INPUT,
-        ":lang rust<ret>3mrm[",
+        ":lang rust<ret>3mSm[",
         r#"\
 fn foo() {
     if let Some(_) = None [
@@ -979,7 +979,7 @@ fn foo() {
 
     test((
         INPUT,
-        ":lang rust<ret>2mrm{",
+        ":lang rust<ret>2mSm{",
         r#"\
 fn foo() {
     if let Some(_) = None {
@@ -999,7 +999,7 @@ fn foo() {
             e|]#
             f
             "},
-        "s\\n<ret>r,",
+        "mr\\n<ret>r,",
         "a#[,|]#b#(,|)#c#(,|)#d#(,|)#e\nf\n",
     ))
     .await?;
@@ -1024,7 +1024,7 @@ async fn macro_play_within_macro_record() -> anyhow::Result<()> {
         indoc! {"\
             #[|]#
         "},
-        r#""aQihello<esc>QQ"aqi<space>world<esc>Q%dqi<ret>"#,
+        r#""aQhhello<esc>QQ"aqh<space>world<esc>Q%dqh<ret>"#,
         indoc! {"\
             hello world
             #[|]#"},
@@ -1065,7 +1065,7 @@ async fn align_selections_with_varying_columns() -> anyhow::Result<()> {
             IIIII
             IIIIIIIII
         "},
-        r"%sI<ret>&gg",
+        r"%mrI<ret>m=<space>g",
         indoc! {r"
             #[I|]#    I  II I
             I    I  II IIIII
@@ -1106,7 +1106,7 @@ async fn buffer_lines_picker() -> anyhow::Result<()> {
             two
             three
             "},
-        "ofour<esc><space>lfour<ret>",
+        "nfour<esc>flfour<ret>",
         indoc! {"\
             one
             #[four|]#
@@ -1122,7 +1122,7 @@ async fn buffer_lines_picker() -> anyhow::Result<()> {
             two
             three
             "},
-        "<space>lthr<ret>",
+        "flthr<ret>",
         indoc! {"\
             one
             two
@@ -1179,7 +1179,7 @@ async fn repeat_any_command() -> anyhow::Result<()> {
             b
             c
             "},
-        "ix<esc>l.",
+        "hx<esc><right>.",
         indoc! {"\
             xa
             #[b|]#
@@ -1194,7 +1194,7 @@ async fn repeat_any_command() -> anyhow::Result<()> {
             #[a|]#
             b
             "},
-        "ix<esc>.",
+        "hx<esc>.",
         indoc! {"\
             xx#[|a]#
             b
@@ -1212,7 +1212,7 @@ async fn repeat_command_with_following_keys() -> anyhow::Result<()> {
         indoc! {"\
             #[(|]#a)
             "},
-        "mm.",
+        "<space>m.",
         indoc! {"\
             #[(|]#a)
             "},
@@ -1236,7 +1236,7 @@ async fn repeat_command_with_following_keys() -> anyhow::Result<()> {
         indoc! {"\
             #[a|]#bcbcb
             "},
-        "fb.",
+        "<space>ob.",
         indoc! {"\
             a#[bcb|]#cb
             "},
@@ -1253,7 +1253,7 @@ async fn repeat_command_with_prompt() -> anyhow::Result<()> {
         indoc! {"\
             #[f|]#oo foo foo foo
             "},
-        "/foo<ret>.",
+        "<space>rfoo<ret>.",
         indoc! {"\
             foo foo #[foo|]# foo
             "},
@@ -1265,7 +1265,7 @@ async fn repeat_command_with_prompt() -> anyhow::Result<()> {
         indoc! {"\
             #[f|]#oo foo foo foo
             "},
-        "/foo<ret>3.",
+        "<space>rfoo<ret>3.",
         indoc! {"\
             foo foo #[foo|]# foo
             "},

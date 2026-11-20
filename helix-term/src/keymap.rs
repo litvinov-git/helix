@@ -446,10 +446,10 @@ mod tests {
             &KeyTrie::MappableCommand(MappableCommand::delete_char_forward),
             "Leaf should replace old leaf in merged subnode"
         );
-        // Assumes that `ge` is in default keymap
+        // Assumes that `gc` is in default keymap
         assert_eq!(
-            keymap.search(&[key!('g'), key!('e')]).unwrap(),
-            &KeyTrie::MappableCommand(MappableCommand::goto_last_line),
+            keymap.search(&[key!('g'), key!('c')]).unwrap(),
+            &KeyTrie::MappableCommand(MappableCommand::toggle_comments),
             "Old leaves in subnode should be present in merged node"
         );
 
@@ -495,22 +495,6 @@ mod tests {
         assert_eq!(
             node.node().unwrap().keys().copied().collect::<Vec<_>>(),
             vec![key!('v'), key!('c')]
-        );
-    }
-
-    #[test]
-    fn aliased_modes_are_same_in_default_keymap() {
-        let keymaps = Keymaps::default().map();
-        let root = keymaps.get(&Mode::Normal).unwrap();
-        assert_eq!(
-            root.search(&[key!(' '), key!('w')]).unwrap(),
-            root.search(&["C-w".parse::<KeyEvent>().unwrap()]).unwrap(),
-            "Mismatch for window mode on `Space-w` and `Ctrl-w`"
-        );
-        assert_eq!(
-            root.search(&[key!('z')]).unwrap(),
-            root.search(&[key!('Z')]).unwrap(),
-            "Mismatch for view mode on `z` and `Z`"
         );
     }
 

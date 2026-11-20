@@ -29,7 +29,7 @@ const B_REV: &str = indoc! {"
     #(a|)#"
 };
 
-const CMD: &str = "<space>?reverse_selection_contents<ret>";
+const CMD: &str = "fpreverse_selection_contents<ret>";
 
 #[tokio::test(flavor = "multi_thread")]
 async fn reverse_selection_contents() -> anyhow::Result<()> {

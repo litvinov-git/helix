@@ -17,7 +17,7 @@ async fn test_split_write_quit_all() -> anyhow::Result<()> {
         vec![
             (
                 Some(&format!(
-                    "ihello1<esc>:sp<ret>:o {}<ret>ihello2<esc>:sp<ret>:o {}<ret>ihello3<esc>",
+                    "hhello1<esc>:sp<ret>:o {}<ret>hhello2<esc>:sp<ret>:o {}<ret>hhello3<esc>",
                     file2.path().to_string_lossy(),
                     file3.path().to_string_lossy()
                 )),
@@ -80,7 +80,7 @@ async fn test_split_write_quit_same_file() -> anyhow::Result<()> {
         &mut app,
         vec![
             (
-                Some("O<esc>ihello<esc>:sp<ret>ogoodbye<esc>"),
+                Some("N<esc>hhello<esc>:sp<ret>ngoodbye<esc>"),
                 Some(&|app| {
                     assert_eq!(2, app.editor.tree.views().count());
                     helpers::assert_status_not_error(&app.editor);
@@ -206,7 +206,7 @@ async fn test_changes_in_splits_jumplist_sync() -> anyhow::Result<()> {
     // selection on "test" (which was deleted in the other view).
     test((
         "#[test|]#",
-        "<C-w>sgf<C-w>wd<C-w>w<C-o><C-w>qd",
+        "ws<space>pwwdww<C-o>wqd",
         "#[|]#",
         LineFeedHandling::AsIs,
     ))
@@ -230,7 +230,7 @@ async fn test_reload_all_with_split_jumplist() -> anyhow::Result<()> {
 
     test_key_sequence(
         &mut app,
-        Some("<C-w>s]<space>%2Gms/:rla<ret>%J<C-w>q"),
+        Some("wsn<esc>%2Gms/:rla<ret>%mjwq"),
         Some(&|app| {
             helpers::assert_status_not_error(&app.editor);
         }),

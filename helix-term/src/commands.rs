@@ -2442,6 +2442,26 @@ fn searcher(cx: &mut Context, direction: Direction) {
 }
 
 fn search_next_or_prev_impl(cx: &mut Context, movement: Movement, direction: Direction) {
+    // Navigate the kept fuzzy search matches instead, if there are any.
+    let (view, doc) = current_ref!(cx.editor);
+    let primary = doc.selection(view.id).primary();
+    let fuzzy_active = cx
+        .editor
+        .registers
+        .fuzzy_search_matches
+        .as_ref()
+        .is_some_and(|(doc_id, version, matches)| {
+            *doc_id == doc.id()
+                && *version == doc.version()
+                && matches
+                    .ranges()
+                    .iter()
+                    .any(|m| m.from() == primary.from() && m.to() == primary.to())
+        });
+    if fuzzy_active {
+        return fuzzy_search_next_or_prev_impl(cx, movement, direction);
+    }
+
     let count = cx.count();
     let register = cx
         .register

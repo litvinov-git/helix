@@ -15,7 +15,7 @@ async fn test_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "##},
-            "<A-e>",
+            "te",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -36,7 +36,7 @@ async fn test_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "<A-e>",
+            "te",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -58,7 +58,7 @@ async fn test_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "##},
-            "v<A-e><A-e>",
+            "vtete",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -93,7 +93,7 @@ async fn test_move_parent_node_start() -> anyhow::Result<()> {
                     }
                 }
             "##},
-            "<A-b>",
+            "tb",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -114,7 +114,7 @@ async fn test_move_parent_node_start() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "<A-b>",
+            "tb",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -135,7 +135,7 @@ async fn test_move_parent_node_start() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "<A-b>",
+            "tb",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -157,7 +157,7 @@ async fn test_move_parent_node_start() -> anyhow::Result<()> {
                     }
                 }
             "##},
-            "v<A-b><A-b>",
+            "vtbtb",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -178,7 +178,7 @@ async fn test_move_parent_node_start() -> anyhow::Result<()> {
                     }
                 }
             "##},
-            "v<A-b><A-b><A-b>",
+            "vtbtbtb",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -213,7 +213,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "##},
-            "i<tab>",
+            "h<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -234,7 +234,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "i<tab>",
+            "h<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -279,7 +279,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "i<tab>",
+            "h<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -323,7 +323,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "i<tab>",
+            "h<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -344,7 +344,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "i<tab>",
+            "h<tab>",
             indoc! {"\
                 fn foo() {
                         #[|l]#et result = if true {
@@ -365,7 +365,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "i<tab>",
+            "h<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -386,7 +386,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "i<tab>",
+            "h<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -409,7 +409,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "i<tab>",
+            "h<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -431,7 +431,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "i<S-tab>",
+            "h<S-tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -459,7 +459,7 @@ async fn select_all_siblings() -> anyhow::Result<()> {
             indoc! {r##"
                 let foo = bar(#[a|]#, b, c);
             "##},
-            "<A-a>",
+            "ta",
             indoc! {r##"
                 let foo = bar(#[a|]#, #(b|)#, #(c|)#);
             "##},
@@ -474,7 +474,7 @@ async fn select_all_siblings() -> anyhow::Result<()> {
                     5,
                 ];
             "##},
-            "<A-a>",
+            "ta",
             indoc! {r##"
                 let a = [
                     #[1|]#,
@@ -496,7 +496,7 @@ async fn select_all_siblings() -> anyhow::Result<()> {
                     5,
                 ];
             "##},
-            "<A-a>",
+            "ta",
             indoc! {r##"
                 let a = [
                     #[|1]#,
@@ -518,7 +518,7 @@ async fn select_all_siblings() -> anyhow::Result<()> {
                     #(5|)#,
                 ];
             "##},
-            "<A-a>",
+            "ta",
             indoc! {r##"
                 let a = [
                     #[1|]#,
@@ -548,7 +548,7 @@ async fn select_all_siblings() -> anyhow::Result<()> {
                     "five",
                 ];
             "##},
-            "<A-a>",
+            "ta",
             indoc! {r##"
                 let a = [
                     #[1|]#,
@@ -582,7 +582,7 @@ async fn select_all_siblings() -> anyhow::Result<()> {
                     5,
                 ];
             "##},
-            "<A-a>",
+            "ta",
             indoc! {r##"
                 let #(a|)# = #[[
                     1,
@@ -610,7 +610,7 @@ async fn select_all_children() -> anyhow::Result<()> {
             indoc! {r##"
                 let foo = bar#[(a, b, c)|]#;
             "##},
-            "<A-I>",
+            "tc",
             indoc! {r##"
                 let foo = bar(#[a|]#, #(b|)#, #(c|)#);
             "##},
@@ -625,7 +625,7 @@ async fn select_all_children() -> anyhow::Result<()> {
                     5,
                 ]|]#;
             "##},
-            "<A-I>",
+            "tc",
             indoc! {r##"
                 let a = [
                     #[1|]#,
@@ -647,7 +647,7 @@ async fn select_all_children() -> anyhow::Result<()> {
                     5,
                 ]]#;
             "##},
-            "<A-I>",
+            "tc",
             indoc! {r##"
                 let a = [
                     #[|1]#,
@@ -669,7 +669,7 @@ async fn select_all_children() -> anyhow::Result<()> {
                     #(5|)#,
                 ];
             "##},
-            "<A-I>",
+            "tc",
             indoc! {r##"
                 let a = [
                     #[1|]#,
@@ -699,7 +699,7 @@ async fn select_all_children() -> anyhow::Result<()> {
                     "five",
                 ]|)#;
             "##},
-            "<A-I>",
+            "tc",
             indoc! {r##"
                 let a = [
                     #[|1]#,
@@ -737,7 +737,7 @@ async fn test_select_next_sibling() -> anyhow::Result<()> {
                 fn dec(x: usize) -> usize { x - 1 }
                 fn ident(x: usize) -> usize { x }
             "##},
-            "<A-n>",
+            "tl",
             indoc! {r##"
                 fn inc(x: usize) -> usize { x + 1 }
                 #[fn dec(x: usize) -> usize { x - 1 }|]#
@@ -751,7 +751,7 @@ async fn test_select_next_sibling() -> anyhow::Result<()> {
                 fn dec(x: usize) -> usize { x - 1 }
                 fn ident(x: usize) -> usize { x }
             "##},
-            "<A-n><A-;><A-n>",
+            "tlmftl",
             indoc! {r##"
                 fn inc(x: usize) -> usize { x + 1 }
                 fn dec(x: usize) -> usize { x - 1 }
@@ -777,7 +777,7 @@ async fn test_select_prev_sibling() -> anyhow::Result<()> {
                 fn dec(x: usize) -> usize { x - 1 }
                 #[|f]#n ident(x: usize) -> usize { x }
             "##},
-            "<A-p>",
+            "tj",
             indoc! {r##"
                 fn inc(x: usize) -> usize { x + 1 }
                 #[|fn dec(x: usize) -> usize { x - 1 }]#
@@ -791,7 +791,7 @@ async fn test_select_prev_sibling() -> anyhow::Result<()> {
                 fn dec(x: usize) -> usize { x - 1 }
                 #[|f]#n ident(x: usize) -> usize { x }
             "##},
-            "<A-p><A-;><A-p>",
+            "tjmftj",
             indoc! {r##"
                 #[|fn inc(x: usize) -> usize { x + 1 }]#
                 fn dec(x: usize) -> usize { x - 1 }
@@ -815,7 +815,7 @@ async fn match_bracket() -> anyhow::Result<()> {
             indoc! {r##"
                 fn foo(x: usize) -> usize { #[x|]# + 1 }
             "##},
-            "mm",
+            "<space>m",
             indoc! {r##"
                 fn foo(x: usize) -> usize { x + 1 #[}|]#
             "##},
@@ -825,7 +825,7 @@ async fn match_bracket() -> anyhow::Result<()> {
             indoc! {r##"
                 fn foo(x: usize) -> usize { #[x|]# + 1 }
             "##},
-            "mmmm",
+            "<space>m<space>m",
             indoc! {r##"
                 fn foo(x: usize) -> usize #[{|]# x + 1 }
             "##},
@@ -835,7 +835,7 @@ async fn match_bracket() -> anyhow::Result<()> {
             indoc! {r##"
                 fn foo() -> &'static str { "(hello#[ |]#world)" }
             "##},
-            "mm",
+            "<space>m",
             indoc! {r##"
                 fn foo() -> &'static str { "(hello world)#["|]# }
             "##},
@@ -845,7 +845,7 @@ async fn match_bracket() -> anyhow::Result<()> {
             indoc! {r##"
                 fn foo() -> &'static str { "(hello#[ |]#world)" }
             "##},
-            "mm",
+            "<space>m",
             indoc! {r##"
                 fn foo() -> &'static str { "(hello world)#["|]# }
             "##},
@@ -855,7 +855,7 @@ async fn match_bracket() -> anyhow::Result<()> {
             indoc! {r##"
                 fn foo() -> &'static str { "(hello#[ |]#world)" }
             "##},
-            "mmmm",
+            "<space>m<space>m",
             indoc! {r##"
                 fn foo() -> &'static str { #["|]#(hello world)" }
             "##},
@@ -870,7 +870,7 @@ async fn match_bracket() -> anyhow::Result<()> {
                     } 
                 }
             "##},
-            "mmmm",
+            "<space>m<space>m",
             indoc! {r##"
                 fn foo(bar: Option<usize>) -> usize {
                     match bar {
@@ -888,7 +888,7 @@ async fn match_bracket() -> anyhow::Result<()> {
                     foo::<b#[a|]#r<>> 
                 }
             "##},
-            "mm",
+            "<space>m",
             indoc! {r##"
                 fn foo() {
                     foo::<bar<>#[>|]# 
@@ -903,7 +903,7 @@ async fn match_bracket() -> anyhow::Result<()> {
                     h, i, j, k, l, m, n,
                 };
             "##},
-            "mm",
+            "<space>m",
             indoc! {r##"
                 use a::{
                     b::{c, d, e, f, g},
@@ -921,7 +921,7 @@ async fn match_bracket() -> anyhow::Result<()> {
             indoc! {r##"
                 foo_python = "mm does not#[ |]#work on this string"
             "##},
-            "mm",
+            "<space>m",
             indoc! {r##"
                 foo_python = "mm does not work on this string#["|]#
             "##},
@@ -930,7 +930,7 @@ async fn match_bracket() -> anyhow::Result<()> {
             indoc! {r##"
                 foo_python = "mm does not#[ |]#work on this string"
             "##},
-            "mmmm",
+            "<space>m<space>m",
             indoc! {r##"
                 foo_python = #["|]#mm does not work on this string"
             "##},

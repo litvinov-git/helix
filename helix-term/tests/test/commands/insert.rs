@@ -27,7 +27,7 @@ async fn insert_newline_many_selections() -> anyhow::Result<()> {
             #(|t)#wo
             #[|t]#hree
             "},
-        "i<ret>",
+        "h<ret>",
         indoc! {"\
             \n#(|o)#ne
 
@@ -45,7 +45,7 @@ async fn insert_newline_many_selections() -> anyhow::Result<()> {
             #[|🏴‍☠️]#          #(|🏴‍☠️)#          #(|🏴‍☠️)#
             #(|🏴‍☠️)#          #(|🏴‍☠️)#          #(|🏴‍☠️)#
             "},
-        "i<ret>",
+        "h<ret>",
         indoc! {"\
             \n#[|🏴‍☠️]#
             #(|🏴‍☠️)#
@@ -64,7 +64,7 @@ async fn insert_newline_many_selections() -> anyhow::Result<()> {
             id #(|1)#,Item #(|1)#,cost #(|1)#,location #(|1)#
             id #(|2)#,Item #(|2)#,cost #(|2)#,location #(|2)#
             id #(|1)##(|0)#,Item #(|1)##(|0)#,cost #(|1)##(|0)#,location #(|1)##[|0]#"},
-        "i<ret>",
+        "h<ret>",
         indoc! {"\
             id
             #(|1)#,Item
@@ -96,7 +96,7 @@ async fn insert_newline_many_selections() -> anyhow::Result<()> {
             #(||)# 〈real R〉 + i #(||)# 〈real R〉 - i #(||)# 〈real R〉 〈infnan〉 i
             #(||)# + 〈ureal R〉 i #(||)# - 〈ureal R〉 i
             #(||)# 〈infnan〉 i #(||)# + i #[||]# - i"},
-        "i<ret>",
+        "h<ret>",
         indoc! {"\
             real R〉
             #(||)# 〈real R〉 @ 〈real R〉
@@ -129,7 +129,7 @@ async fn insert_newline_trim_trailing_whitespace() -> anyhow::Result<()> {
             ]#world
             "}
         .replace('·', " "),
-        "i<ret>",
+        "h<ret>",
         indoc! {"\
             hello
             #[|
@@ -145,7 +145,7 @@ async fn insert_newline_trim_trailing_whitespace() -> anyhow::Result<()> {
             hello········#[|w]#orld
             "}
         .replace('·', " "),
-        "i<ret>",
+        "h<ret>",
         indoc! {"\
             hello
             #[|w]#orld
@@ -160,7 +160,7 @@ async fn insert_newline_trim_trailing_whitespace() -> anyhow::Result<()> {
             hello········#[|·]#····world
             "}
         .replace('·', " "),
-        "i<ret>",
+        "h<ret>",
         indoc! {"\
             hello
             #[|·]#····world
@@ -192,7 +192,7 @@ async fn insert_newline_continue_line_comment() -> anyhow::Result<()> {
             // Hello world!#[|
             ]#
             "},
-        ":lang rust<ret>i<ret>",
+        ":lang rust<ret>h<ret>",
         indoc! {"\
             // Hello world!
             // #[|
@@ -208,7 +208,7 @@ async fn insert_newline_continue_line_comment() -> anyhow::Result<()> {
             // Hello world!#[|
             ]#
             "},
-        ":lang go<ret>i<ret>",
+        ":lang go<ret>h<ret>",
         indoc! {"\
             // Hello world!
             // #[|
@@ -222,7 +222,7 @@ async fn insert_newline_continue_line_comment() -> anyhow::Result<()> {
             //go:generate echo hello#[|
             ]#
             "},
-        ":lang go<ret>i<ret>",
+        ":lang go<ret>h<ret>",
         indoc! {"\
             //go:generate echo hello
             // #[|
@@ -238,7 +238,7 @@ async fn insert_newline_continue_line_comment() -> anyhow::Result<()> {
             // Hello world!#[|
             ]#
             "},
-        ":lang rust<ret>I<ret>",
+        ":lang rust<ret>H<ret>",
         indoc! {"\
             \n#[/|]#/ Hello world!
             "},
@@ -253,7 +253,7 @@ async fn insert_newline_continue_line_comment() -> anyhow::Result<()> {
             // #[|
             ]#
             "},
-        ":lang rust<ret>i<ret>",
+        ":lang rust<ret>h<ret>",
         indoc! {"\
             // Hello world!
             //
@@ -270,7 +270,7 @@ async fn insert_newline_continue_line_comment() -> anyhow::Result<()> {
             //·hello····#[|·]#····world
             "}
         .replace('·', " "),
-        ":lang rust<ret>i<ret>",
+        ":lang rust<ret>h<ret>",
         indoc! {"\
             //·hello
             //·#[|·]#····world
@@ -290,7 +290,7 @@ async fn insert_newline_continue_line_comment() -> anyhow::Result<()> {
             pub·struct·B;
             "}
         .replace('·', " "),
-        ":lang rust<ret>i<ret><ret>",
+        ":lang rust<ret>h<ret><ret>",
         indoc! {"\
             ///·Docs
             ///
@@ -314,7 +314,7 @@ async fn continue_comment_only_in_comments() -> anyhow::Result<()> {
     // A shebang isn't a comment leader.
     test((
         "#!/bin/sh#[|\n]#",
-        ":lang bash<ret>i<ret>",
+        ":lang bash<ret>h<ret>",
         "#!/bin/sh\n#[|\n]#",
     ))
     .await?;
@@ -322,7 +322,7 @@ async fn continue_comment_only_in_comments() -> anyhow::Result<()> {
     // Nor is a comment token inside a string.
     test((
         "s = \"\"\"\n# Title#[|\n]#\"\"\"\n",
-        ":lang python<ret>i<ret>",
+        ":lang python<ret>h<ret>",
         "s = \"\"\"\n# Title\n#[|\n]#\"\"\"\n",
     ))
     .await
@@ -334,7 +334,7 @@ async fn test_open_above() -> anyhow::Result<()> {
     // `O` is pressed in the first line
     test((
         indoc! {"Helix #[is|]# cool"},
-        ":lang markdown<ret>O",
+        ":lang markdown<ret>N",
         indoc! {"\
             #[\n|]#
             Helix is cool
@@ -348,7 +348,7 @@ async fn test_open_above() -> anyhow::Result<()> {
             ··This line has 2 spaces in front of it#[\n|]#
         "}
         .replace('·', " "),
-        ":lang markdown<ret>Oa",
+        ":lang markdown<ret>Na",
         indoc! {"\
             ··a#[\n|]#
             ··This line has 2 spaces in front of it
@@ -363,7 +363,7 @@ async fn test_open_above() -> anyhow::Result<()> {
             I use
             b#[t|]#w.
         "},
-        ":lang markdown<ret>Oarch",
+        ":lang markdown<ret>Narch",
         indoc! {"\
             I use
             arch#[\n|]#
@@ -379,7 +379,7 @@ async fn test_open_above() -> anyhow::Result<()> {
             ····b#[t|]#w.
         "}
         .replace("·", " "),
-        ":lang markdown<ret>Ohelix",
+        ":lang markdown<ret>Nhelix",
         indoc! {"\
             I use
             ····helix#[\n|]#
@@ -399,7 +399,7 @@ async fn test_open_above_with_multiple_cursors() -> anyhow::Result<()> {
         indoc! {"#[H|]#elix
             #(i|)#s
             #(c|)#ool"},
-        "O",
+        "N",
         indoc! {
             "#[\n|]#
             Helix
@@ -418,7 +418,7 @@ async fn test_open_above_with_multiple_cursors() -> anyhow::Result<()> {
             ····#(i|)#s
             ····#(c|)#ool"}
         .replace("·", " "),
-        ":indent-style 4<ret>O",
+        ":indent-style 4<ret>N",
         indoc! {
             "····#[\n|]#
             ····Helix
@@ -440,7 +440,7 @@ async fn test_open_above_with_multiple_cursors() -> anyhow::Result<()> {
                 // #[VIP|]# comment
                 l#(e|)#t yes = false;
             }"},
-        ":lang rust<ret>O",
+        ":lang rust<ret>N",
         indoc! {"fn main() {
                 // #[\n|]#
                 // VIP comment
@@ -460,7 +460,7 @@ async fn test_open_below_with_multiple_cursors() -> anyhow::Result<()> {
         indoc! {"#[H|]#elix
             #(i|)#s
             #(c|)#ool"},
-        "o",
+        "n",
         indoc! {"Helix
             #[\n|]#
             is
@@ -478,7 +478,7 @@ async fn test_open_below_with_multiple_cursors() -> anyhow::Result<()> {
             ····#(i|)#s
             ····#(c|)#ool"}
         .replace("·", " "),
-        ":indent-style 4<ret>o",
+        ":indent-style 4<ret>n",
         indoc! {
             "····Helix
             ····#[\n|]#
@@ -500,7 +500,7 @@ async fn test_open_below_with_multiple_cursors() -> anyhow::Result<()> {
                 // #[VIP|]# comment
                 l#(e|)#t yes = false;
             }"},
-        ":lang rust<ret>o",
+        ":lang rust<ret>n",
         indoc! {"fn main() {
                 // VIP comment
                 // #[\n|]#
@@ -519,7 +519,7 @@ async fn test_open_below_with_multiple_cursors() -> anyhow::Result<()> {
             // VIP#[|]# comment
             func main() {}
         "},
-        ":lang go<ret>o",
+        ":lang go<ret>n",
         indoc! {"\
             package main
 
@@ -539,7 +539,7 @@ async fn test_open_above_with_comments() -> anyhow::Result<()> {
     // `O` is pressed in the first line inside a line comment
     test((
         indoc! {"// a commen#[t|]#"},
-        ":lang rust<ret>O",
+        ":lang rust<ret>N",
         indoc! {"\
             // #[\n|]#
             // a comment
@@ -550,7 +550,7 @@ async fn test_open_above_with_comments() -> anyhow::Result<()> {
     // `O` is pressed in the first line inside a line comment, but with indentation
     test((
         indoc! {"····// a comm#[e|]#nt"}.replace("·", " "),
-        ":lang rust<ret>O",
+        ":lang rust<ret>N",
         indoc! {"\
             ····// #[\n|]#
             ····// a comment
@@ -565,7 +565,7 @@ async fn test_open_above_with_comments() -> anyhow::Result<()> {
             fn main() { }
             // yeetus deletus#[\n|]#
         "},
-        ":lang rust<ret>O",
+        ":lang rust<ret>N",
         indoc! {"\
             fn main() { }
             // #[\n|]#
@@ -581,7 +581,7 @@ async fn test_open_above_with_comments() -> anyhow::Result<()> {
             ····// yeetus deletus#[\n|]#
         "}
         .replace("·", " "),
-        ":lang rust<ret>O",
+        ":lang rust<ret>N",
         indoc! {"\
             fn main() { }
             ····// #[\n|]#
@@ -604,7 +604,7 @@ async fn try_restore_indent() -> anyhow::Result<()> {
         }
         "},
         // `try_restore_indent` should remove the indentation when adding a blank line.
-        ":lang rust<ret>o<esc>",
+        ":lang rust<ret>n<esc>",
         indoc! {"\
         if true {
         #[
@@ -636,7 +636,7 @@ async fn test_jump_undo_redo() -> anyhow::Result<()> {
     // Undo
     test_with_config(
         AppBuilder::new().with_config(config.clone()),
-        ("#[|]#", "iworld<C-i>Hello, <esc>u", "#[w|]#orld"),
+        ("#[|]#", "hworld<C-i>Hello, <esc>ue", "#[w|]#orld"),
     )
     .await?;
 
@@ -645,7 +645,7 @@ async fn test_jump_undo_redo() -> anyhow::Result<()> {
         AppBuilder::new().with_config(config),
         (
             "#[|]#",
-            "iworld<C-i>Hello, <esc>ui<C-o><esc>U",
+            "hworld<C-i>Hello, <esc>ueh<C-o><esc>oe",
             "Hello, #[w|]#orld",
         ),
     )
@@ -663,7 +663,7 @@ async fn test_indent_with_spaces() -> anyhow::Result<()> {
                   #[|FROM table]#
                  #(|WHERE condition)#
             "},
-            "i<tab>",
+            "h<tab>",
             indoc! {"\
                 SELECT *
                     #[|FROM table]#
@@ -677,7 +677,7 @@ async fn test_indent_with_spaces() -> anyhow::Result<()> {
                 FROM #(table|)#
                 WHERE #(condition|)#
             "},
-            "i<S-tab>",
+            "h<S-tab>",
             indoc! {"\
                 SELECT  #[|*]#
                 FROM    #(|table)#

@@ -205,7 +205,7 @@ async fn fuzzy_search_matches_are_dropped_by_other_changes() -> anyhow::Result<(
             #[x|]#x
             ab xx a_b
             "},
-        "<A-f>ab<ret>l<A-n>",
+        "<A-f>ab<ret><right><A-n>",
         indoc! {"\
             xx
             ab#[ |]#xx a_b
@@ -219,10 +219,47 @@ async fn fuzzy_search_matches_are_dropped_by_other_changes() -> anyhow::Result<(
             #[x|]#x
             ab xx a_b
             "},
-        "<A-f>ab<ret>~<A-n>",
+        "<A-f>ab<ret>rX<A-n>",
         indoc! {"\
             xx
-            #[AB|]# xx a_b
+            #[XX|]# xx a_b
+            "},
+    ))
+    .await?;
+
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn match_keys_navigate_fuzzy_then_regex_matches() -> anyhow::Result<()> {
+    // `oo` / `uu` navigate the kept fuzzy matches...
+    test((
+        indoc! {"\
+            #[x|]#x
+            ab xx a_b xx ab
+            ab
+            "},
+        "<space>fab<ret>oo",
+        indoc! {"\
+            xx
+            ab xx #[a_b|]# xx ab
+            ab
+            "},
+    ))
+    .await?;
+
+    // ...and fall back to the regex search once another motion was made.
+    test((
+        indoc! {"\
+            #[x|]#x
+            ab xx a_b xx ab
+            ab
+            "},
+        "<space>fab<ret>l<space>rxx<ret>oo",
+        indoc! {"\
+            xx
+            ab xx a_b #[xx|]# ab
+            ab
             "},
     ))
     .await?;
