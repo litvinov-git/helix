@@ -1245,3 +1245,32 @@ async fn repeat_command_with_following_keys() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[tokio::test(flavor = "multi_thread")]
+async fn repeat_command_with_prompt() -> anyhow::Result<()> {
+    // the prompt is validated with its last history entry
+    test((
+        indoc! {"\
+            #[f|]#oo foo foo foo
+            "},
+        "/foo<ret>.",
+        indoc! {"\
+            foo foo #[foo|]# foo
+            "},
+    ))
+    .await?;
+
+    // a command with a prompt is repeated once regardless of the count
+    test((
+        indoc! {"\
+            #[f|]#oo foo foo foo
+            "},
+        "/foo<ret>3.",
+        indoc! {"\
+            foo foo #[foo|]# foo
+            "},
+    ))
+    .await?;
+
+    Ok(())
+}

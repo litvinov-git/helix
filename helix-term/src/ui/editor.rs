@@ -1084,6 +1084,11 @@ impl EditorView {
                     }
                 }
             }
+
+            // a command which opened something (e.g. a prompt) is only repeated once
+            if !cxt.callback.is_empty() {
+                break;
+            }
         }
 
         let config = cxt.editor.config();

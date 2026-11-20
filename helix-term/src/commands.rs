@@ -1836,6 +1836,19 @@ fn repeat(cx: &mut Context) {
         for callback in editor_view.repeat(cx, count) {
             callback(compositor, cx)
         }
+
+        // A prompt opened by the command is validated with the last entry of
+        // its history, like pressing enter on an empty prompt.
+        let Some(prompt) = compositor.find::<Prompt>() else {
+            return;
+        };
+        if prompt.first_history_completion(cx.editor).is_some() {
+            if let compositor::EventResult::Consumed(Some(callback)) =
+                prompt.handle_event(&compositor::Event::Key(crate::key!(Enter)), cx)
+            {
+                callback(compositor, cx);
+            }
+        }
     }));
 }
 
