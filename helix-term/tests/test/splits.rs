@@ -17,7 +17,7 @@ async fn test_split_write_quit_all() -> anyhow::Result<()> {
         vec![
             (
                 Some(&format!(
-                    "hhello1<esc>:sp<ret>:o {}<ret>hhello2<esc>:sp<ret>:o {}<ret>hhello3<esc>",
+                    "uhello1<esc>:sp<ret>:o {}<ret>uhello2<esc>:sp<ret>:o {}<ret>uhello3<esc>",
                     file2.path().to_string_lossy(),
                     file3.path().to_string_lossy()
                 )),
@@ -80,7 +80,7 @@ async fn test_split_write_quit_same_file() -> anyhow::Result<()> {
         &mut app,
         vec![
             (
-                Some("N<esc>hhello<esc>:sp<ret>ngoodbye<esc>"),
+                Some("N<esc>uhello<esc>:sp<ret>ngoodbye<esc>"),
                 Some(&|app| {
                     assert_eq!(2, app.editor.tree.views().count());
                     helpers::assert_status_not_error(&app.editor);
@@ -161,7 +161,7 @@ async fn test_changes_in_splits_apply_to_all_views() -> anyhow::Result<()> {
     // correct order as we switch between windows.
     test_extra_keys((
         "#[|]#",
-        "n<esc>n<esc>n<esc>wvueueuewwoeoeoewqueueue",
+        "n<esc>n<esc>n<esc>wvgegegewwhehehewqgegege",
         "#[\n|]#",
         LineFeedHandling::AsIs,
     ))
@@ -178,7 +178,7 @@ async fn test_changes_in_splits_apply_to_all_views() -> anyhow::Result<()> {
     // * wv<A-s>      Create a split and save that point at the end of the document
     //                in the jumplist.
     // * ww           Switch back to the first window.
-    // * ueue         Undo twice (not three times which would bring us back to the
+    // * gege         Undo twice (not three times which would bring us back to the
     //                root of the tree).
     // * n<esc> x3     Create three empty lines. Now the end of the document is past
     //                where it was on step 1.
@@ -187,7 +187,7 @@ async fn test_changes_in_splits_apply_to_all_views() -> anyhow::Result<()> {
     // * %d           Clean up the buffer.
     test_extra_keys((
         "#[|]#",
-        "n<esc>n<esc>n<esc>wv<A-s>wwueuen<esc>n<esc>n<esc>wq%d",
+        "n<esc>n<esc>n<esc>wv<A-s>wwgegen<esc>n<esc>n<esc>wq%d",
         "#[|]#",
         LineFeedHandling::AsIs,
     ))
@@ -230,7 +230,7 @@ async fn test_reload_all_with_split_jumplist() -> anyhow::Result<()> {
 
     test_key_sequence(
         &mut app,
-        Some("wsn<esc>%2Gms/:rla<ret>%mjwq"),
+        Some("wsn<esc>%2<space>nms/:rla<ret>%mjwq"),
         Some(&|app| {
             helpers::assert_status_not_error(&app.editor);
         }),

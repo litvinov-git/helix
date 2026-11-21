@@ -18,7 +18,7 @@ async fn test_exit_w_buffer_w_path() -> anyhow::Result<()> {
     // Check for write operation on given path and edited buffer
     test_key_sequence(
         &mut app,
-        Some("hBecause of the obvious threat to untold numbers of citizens due to the crisis that is even now developing, this radio station will remain on the air day and night.<ret><esc>:x<ret>"),
+        Some("uBecause of the obvious threat to untold numbers of citizens due to the crisis that is even now developing, this radio station will remain on the air day and night.<ret><esc>:x<ret>"),
         None,
         true,
     )
@@ -82,7 +82,7 @@ async fn test_exit_w_buffer_wo_file() -> anyhow::Result<()> {
     test_key_sequence(
         // try to write without destination
         &mut AppBuilder::new().build()?,
-        Some("htest<esc>:x<ret>"),
+        Some("utest<esc>:x<ret>"),
         None,
         false,
     )
@@ -90,7 +90,7 @@ async fn test_exit_w_buffer_wo_file() -> anyhow::Result<()> {
     test_key_sequence(
         // try to write with path succeeds
         &mut AppBuilder::new().build()?,
-        Some(format!("hMicCheck<esc>:x {}<ret>", file.path().to_string_lossy()).as_ref()),
+        Some(format!("uMicCheck<esc>:x {}<ret>", file.path().to_string_lossy()).as_ref()),
         Some(&|app| {
             assert!(!app.editor.is_err());
         }),
@@ -112,7 +112,7 @@ async fn test_write_quit_fail() -> anyhow::Result<()> {
 
     test_key_sequence(
         &mut app,
-        Some("hhello<esc>:wq<ret>"),
+        Some("uhello<esc>:wq<ret>"),
         Some(&|app| {
             let mut docs: Vec<_> = app.editor.documents().collect();
             assert_eq!(1, docs.len());
@@ -144,7 +144,7 @@ async fn test_buffer_close_concurrent() -> anyhow::Result<()> {
                 }),
             ),
             (
-                Some("hhello<esc>:new<ret>"),
+                Some("uhello<esc>:new<ret>"),
                 Some(&|app| {
                     assert_eq!(2, app.editor.documents().count());
                     assert!(!app.editor.is_err());
@@ -208,7 +208,7 @@ async fn test_write() -> anyhow::Result<()> {
 
     test_key_sequence(
         &mut app,
-        Some("hthe gostak distims the doshes<ret><esc>:w<ret>"),
+        Some("uthe gostak distims the doshes<ret><esc>:w<ret>"),
         None,
         false,
     )
@@ -241,7 +241,7 @@ async fn test_overwrite_protection() -> anyhow::Result<()> {
     file.as_file_mut().flush()?;
     file.as_file_mut().sync_all()?;
 
-    test_key_sequence(&mut app, Some("hOverwriteData<esc>:x<ret>"), None, false).await?;
+    test_key_sequence(&mut app, Some("uOverwriteData<esc>:x<ret>"), None, false).await?;
 
     reload_file(&mut file).unwrap();
     let mut file_content = String::new();
@@ -261,7 +261,7 @@ async fn test_write_quit() -> anyhow::Result<()> {
 
     test_key_sequence(
         &mut app,
-        Some("hthe gostak distims the doshes<ret><esc>:wq<ret>"),
+        Some("uthe gostak distims the doshes<ret><esc>:wq<ret>"),
         None,
         true,
     )
@@ -325,7 +325,7 @@ async fn test_write_fail_mod_flag() -> anyhow::Result<()> {
                 }),
             ),
             (
-                Some("hhello<esc>"),
+                Some("uhello<esc>"),
                 Some(&|app| {
                     let doc = doc!(app.editor);
                     assert!(doc.is_modified());
@@ -354,7 +354,7 @@ async fn test_write_scratch_to_new_path() -> anyhow::Result<()> {
 
     test_key_sequence(
         &mut AppBuilder::new().build()?,
-        Some(format!("hhello<esc>:w {}<ret>", file.path().to_string_lossy()).as_ref()),
+        Some(format!("uhello<esc>:w {}<ret>", file.path().to_string_lossy()).as_ref()),
         Some(&|app| {
             assert!(!app.editor.is_err());
 
@@ -383,7 +383,7 @@ async fn test_write_scratch_to_new_path_force_creates_file() -> anyhow::Result<(
 
     test_key_sequence(
         &mut AppBuilder::new().build()?,
-        Some(format!("hhello<esc>:w! {}<ret>", new_path.to_string_lossy()).as_ref()),
+        Some(format!("uhello<esc>:w! {}<ret>", new_path.to_string_lossy()).as_ref()),
         Some(&|app| {
             assert!(!app.editor.is_err());
 
@@ -513,7 +513,7 @@ async fn test_write_new_path() -> anyhow::Result<()> {
         &mut app,
         vec![
             (
-                Some("hi can eat glass, it will not hurt me<ret><esc>:w<ret>"),
+                Some("ui can eat glass, it will not hurt me<ret><esc>:w<ret>"),
                 Some(&|app| {
                     let doc = doc!(app.editor);
                     assert!(!app.editor.is_err());
@@ -596,7 +596,7 @@ async fn test_write_refuses_lossy_decode() -> anyhow::Result<()> {
         &mut app,
         vec![
             (
-                Some("hx<esc>:w<ret>"),
+                Some("ux<esc>:w<ret>"),
                 Some(&|app| {
                     assert!(app.editor.is_err());
                     assert_eq!(std::fs::read(&path).unwrap(), bytes);
@@ -758,7 +758,7 @@ async fn test_write_all_insert_final_newline_add_if_missing_and_modified() -> an
     test_key_sequence(
         &mut app,
         Some(&format!(
-            ":o {}<ret>ha time traveler walks into a bar<esc>:wa<ret>",
+            ":o {}<ret>ua time traveler walks into a bar<esc>:wa<ret>",
             file2.path().to_string_lossy()
         )),
         None,
@@ -815,7 +815,7 @@ async fn test_symlink_write() -> anyhow::Result<()> {
 
     test_key_sequence(
         &mut app,
-        Some("hthe gostak distims the doshes<ret><esc>:w<ret>"),
+        Some("uthe gostak distims the doshes<ret><esc>:w<ret>"),
         None,
         false,
     )
@@ -853,7 +853,7 @@ async fn test_symlink_write_fail() -> anyhow::Result<()> {
 
     test_key_sequence(
         &mut app,
-        Some("hhello<esc>:wq<ret>"),
+        Some("uhello<esc>:wq<ret>"),
         Some(&|app| {
             let mut docs: Vec<_> = app.editor.documents().collect();
             assert_eq!(1, docs.len());
@@ -900,7 +900,7 @@ async fn test_symlink_write_relative() -> anyhow::Result<()> {
 
     test_key_sequence(
         &mut app,
-        Some("hthe gostak distims the doshes<ret><esc>:w<ret>"),
+        Some("uthe gostak distims the doshes<ret><esc>:w<ret>"),
         None,
         false,
     )
@@ -934,7 +934,7 @@ async fn test_hardlink_write() -> anyhow::Result<()> {
 
     test_key_sequence(
         &mut app,
-        Some("hthe gostak distims the doshes<ret><esc>:w<ret>"),
+        Some("uthe gostak distims the doshes<ret><esc>:w<ret>"),
         None,
         false,
     )

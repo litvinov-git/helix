@@ -213,7 +213,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "##},
-            "h<tab>",
+            "u<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -234,7 +234,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "h<tab>",
+            "u<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -257,7 +257,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "a<tab>",
+            "o<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -279,7 +279,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "h<tab>",
+            "u<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -302,7 +302,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "a<tab>",
+            "o<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -323,7 +323,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "h<tab>",
+            "u<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -344,7 +344,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "h<tab>",
+            "u<tab>",
             indoc! {"\
                 fn foo() {
                         #[|l]#et result = if true {
@@ -365,7 +365,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "h<tab>",
+            "u<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -386,7 +386,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "h<tab>",
+            "u<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -409,7 +409,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "h<tab>",
+            "u<tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {
@@ -431,7 +431,7 @@ async fn test_smart_tab_move_parent_node_end() -> anyhow::Result<()> {
                     }
                 }
             "},
-            "h<S-tab>",
+            "u<S-tab>",
             indoc! {"\
                 fn foo() {
                     let result = if true {

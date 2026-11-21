@@ -18,7 +18,7 @@ async fn search_selection_detect_word_boundaries_at_eof() -> anyhow::Result<()> 
             #[o|]#ne
             two
             three"},
-        "<space>Gk*<left>",
+        "<space>ok*<left>",
         indoc! {"\
             one
             two
@@ -137,7 +137,7 @@ async fn test_goto_file_impl() -> anyhow::Result<()> {
     // Single selection
     test_key_sequence(
         &mut AppBuilder::new().with_file(file.path(), None).build()?,
-        Some("hone.js<esc>%<space>p"),
+        Some("uone.js<esc>%<space>p"),
         Some(&|app| {
             assert_eq!(1, match_paths(app, vec!["one.js"]));
         }),
@@ -148,7 +148,7 @@ async fn test_goto_file_impl() -> anyhow::Result<()> {
     // Multiple selection
     test_key_sequence(
         &mut AppBuilder::new().with_file(file.path(), None).build()?,
-        Some("hone.js<ret>two.js<esc>%mn<space>p"),
+        Some("uone.js<ret>two.js<esc>%mn<space>p"),
         Some(&|app| {
             assert_eq!(2, match_paths(app, vec!["one.js", "two.js"]));
         }),
@@ -159,7 +159,7 @@ async fn test_goto_file_impl() -> anyhow::Result<()> {
     // Cursor on first quote
     test_key_sequence(
         &mut AppBuilder::new().with_file(file.path(), None).build()?,
-        Some("himport 'one.js'<esc>J;<space>p"),
+        Some("uimport 'one.js'<esc>J;<space>p"),
         Some(&|app| {
             assert_eq!(1, match_paths(app, vec!["one.js"]));
         }),
@@ -170,7 +170,7 @@ async fn test_goto_file_impl() -> anyhow::Result<()> {
     // Cursor on last quote
     test_key_sequence(
         &mut AppBuilder::new().with_file(file.path(), None).build()?,
-        Some("himport 'one.js'<esc>j<space>p"),
+        Some("uimport 'one.js'<esc>j<space>p"),
         Some(&|app| {
             assert_eq!(1, match_paths(app, vec!["one.js"]));
         }),
@@ -181,7 +181,7 @@ async fn test_goto_file_impl() -> anyhow::Result<()> {
     // ';' is behind the path
     test_key_sequence(
         &mut AppBuilder::new().with_file(file.path(), None).build()?,
-        Some("himport 'one.js';<esc>J;<space>p"),
+        Some("uimport 'one.js';<esc>J;<space>p"),
         Some(&|app| {
             assert_eq!(1, match_paths(app, vec!["one.js"]));
         }),
@@ -192,7 +192,7 @@ async fn test_goto_file_impl() -> anyhow::Result<()> {
     // allow numeric values in path
     test_key_sequence(
         &mut AppBuilder::new().with_file(file.path(), None).build()?,
-        Some("himport 'one123.js'<esc>J;<space>p"),
+        Some("uimport 'one123.js'<esc>J;<space>p"),
         Some(&|app| {
             assert_eq!(1, match_paths(app, vec!["one123.js"]));
         }),
@@ -287,7 +287,7 @@ async fn test_undo_redo() -> anyhow::Result<()> {
     //               if the jumplist were not being updated correctly.
     test_extra_keys((
         "#[|]#",
-        "n<esc>n<esc><A-s>ueue<C-o><C-i>",
+        "n<esc>n<esc><A-s>gege<C-o>hj",
         "#[\n|]#",
         LineFeedHandling::AsIs,
     ))
@@ -304,7 +304,7 @@ async fn test_undo_redo() -> anyhow::Result<()> {
     // * <C-i>       Jump forward to line 1.
     test_extra_keys((
         "#[|]#",
-        "n<esc><A-s>idueoe<C-o><C-i>",
+        "n<esc><A-s>idgehe<C-o>hj",
         "#[|]#",
         LineFeedHandling::AsIs,
     ))
@@ -313,7 +313,7 @@ async fn test_undo_redo() -> anyhow::Result<()> {
     // In this case we 'redo' manually to ensure that the transactions are composing correctly.
     test_extra_keys((
         "#[|]#",
-        "n<esc>uen<esc>ue",
+        "n<esc>gen<esc>ge",
         "#[\n|]#",
         LineFeedHandling::AsIs,
     ))
@@ -366,7 +366,7 @@ async fn test_character_info() -> anyhow::Result<()> {
     // UTF-8, single byte
     test_key_sequence(
         &mut helpers::AppBuilder::new().build()?,
-        Some("hh<esc><left>:char<ret>"),
+        Some("uh<esc><left>:char<ret>"),
         Some(&|app| {
             assert_eq!(
                 r#""h" (U+0068) Dec 104 Hex 68"#,
@@ -380,7 +380,7 @@ async fn test_character_info() -> anyhow::Result<()> {
     // UTF-8, multi-byte
     test_key_sequence(
         &mut helpers::AppBuilder::new().build()?,
-        Some("hë<esc><left>:char<ret>"),
+        Some("uë<esc><left>:char<ret>"),
         Some(&|app| {
             assert_eq!(
                 r#""ë" (U+0065 U+0308) Hex 65 + cc 88"#,
@@ -408,7 +408,7 @@ async fn test_character_info() -> anyhow::Result<()> {
     // Non-UTF-8
     test_key_sequence(
         &mut helpers::AppBuilder::new().build()?,
-        Some(":encoding ascii<ret>hh<esc><left>:char<ret>"),
+        Some(":encoding ascii<ret>uh<esc><left>:char<ret>"),
         Some(&|app| {
             assert_eq!(r#""h" Dec 104 Hex 68"#, app.editor.get_status().unwrap().0);
         }),
@@ -425,7 +425,7 @@ async fn test_delete_char_backward() -> anyhow::Result<()> {
     test(("#(x|)# #[x|]#", "c<space><backspace><esc>", "#[\n|]#")).await?;
     test((
         "#( |)##( |)#a#( |)#axx#[x|]#a",
-        "<right>h<backspace><esc>",
+        "<right>u<backspace><esc>",
         "#(a|)##(|a)#xx#[|a]#",
     ))
     .await?;
@@ -460,14 +460,14 @@ async fn test_try_restore_indent() -> anyhow::Result<()> {
 #[tokio::test(flavor = "multi_thread")]
 async fn test_delete_word_backward() -> anyhow::Result<()> {
     // don't panic when deleting overlapping ranges
-    test(("fo#[o|]#ba#(r|)#", "a<C-w><esc>", "#[\n|]#")).await?;
+    test(("fo#[o|]#ba#(r|)#", "o<C-w><esc>", "#[\n|]#")).await?;
     Ok(())
 }
 
 #[tokio::test(flavor = "multi_thread")]
 async fn test_delete_word_forward() -> anyhow::Result<()> {
     // don't panic when deleting overlapping ranges
-    test(("fo#[o|]#b#(|ar)#", "h<A-d><esc>", "fo#[\n|]#")).await?;
+    test(("fo#[o|]#b#(|ar)#", "u<A-d><esc>", "fo#[\n|]#")).await?;
     Ok(())
 }
 
@@ -480,7 +480,7 @@ async fn test_delete_char_forward() -> anyhow::Result<()> {
                 #(abc|)#f
                 #(abc|)#
             "},
-        "a<del><esc>",
+        "o<del><esc>",
         indoc! {"\
                 #[abc|]#ef
                 #(abc|)#f
@@ -512,7 +512,7 @@ async fn test_insert_with_indent() -> anyhow::Result<()> {
     // insert_at_line_start
     test((
         INPUT,
-        ":lang rust<ret>%mnH",
+        ":lang rust<ret>%mnU",
         indoc! { "
             #[f|]#n foo() {
                 #(i|)#f let Some(_) = None {
@@ -532,7 +532,7 @@ async fn test_insert_with_indent() -> anyhow::Result<()> {
     // insert_at_line_end
     test((
         INPUT,
-        ":lang rust<ret>%mnA",
+        ":lang rust<ret>%mnO",
         indoc! { "
             fn foo() {#[\n|]#
                 if let Some(_) = None {#(\n|)#
@@ -1024,7 +1024,7 @@ async fn macro_play_within_macro_record() -> anyhow::Result<()> {
         indoc! {"\
             #[|]#
         "},
-        r#""aQhhello<esc>QQ"aqh<space>world<esc>Q%dqh<ret>"#,
+        r#""aQuhello<esc>QQ"aqu<space>world<esc>Q%dqu<ret>"#,
         indoc! {"\
             hello world
             #[|]#"},
@@ -1065,7 +1065,7 @@ async fn align_selections_with_varying_columns() -> anyhow::Result<()> {
             IIIII
             IIIIIIIII
         "},
-        r"%mrI<ret>m=<space>g",
+        r"%mrI<ret>m=<space>u",
         indoc! {r"
             #[I|]#    I  II I
             I    I  II IIIII
@@ -1179,7 +1179,7 @@ async fn repeat_any_command() -> anyhow::Result<()> {
             b
             c
             "},
-        "hx<esc><right>.",
+        "ux<esc><right>.",
         indoc! {"\
             xa
             #[b|]#
@@ -1194,7 +1194,7 @@ async fn repeat_any_command() -> anyhow::Result<()> {
             #[a|]#
             b
             "},
-        "hx<esc>.",
+        "ux<esc>.",
         indoc! {"\
             xx#[|a]#
             b
@@ -1236,7 +1236,7 @@ async fn repeat_command_with_following_keys() -> anyhow::Result<()> {
         indoc! {"\
             #[a|]#bcbcb
             "},
-        "<space>ob.",
+        "<space>hb.",
         indoc! {"\
             a#[bcb|]#cb
             "},
@@ -1279,10 +1279,10 @@ async fn repeat_command_with_prompt() -> anyhow::Result<()> {
 async fn extend_prev_next_keeps_the_anchor() -> anyhow::Result<()> {
     let text = "#[a|]#\nb\n\nc\n\nd\n";
     // `op` moves the cursor, `Op` extends the selection to the next paragraph.
-    test((text, "op", "#[a\nb\n\n|]#c\n\nd\n")).await?;
-    test(("a\nb\n\n#[c|]#\n\nd\n", "Op", "a\nb\n\n#[c\n\n|]#d\n")).await?;
+    test((text, "hp", "#[a\nb\n\n|]#c\n\nd\n")).await?;
+    test(("a\nb\n\n#[c|]#\n\nd\n", "Hp", "a\nb\n\n#[c\n\n|]#d\n")).await?;
     // Select mode has the same behavior for `op`.
-    test(("a\nb\n\n#[c|]#\n\nd\n", "vop", "a\nb\n\n#[c\n\n|]#d\n")).await?;
+    test(("a\nb\n\n#[c|]#\n\nd\n", "vhp", "a\nb\n\n#[c\n\n|]#d\n")).await?;
     Ok(())
 }
 

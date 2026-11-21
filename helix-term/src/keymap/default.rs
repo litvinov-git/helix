@@ -12,20 +12,19 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
         "left" => move_char_left,
         "right" => move_char_right,
         "j" => move_prev_word_start,
-        "l" => move_next_word_start,
+        "l" => move_next_word_end,
         "J" => move_prev_long_word_start,
-        "L" => move_next_long_word_start,
+        "L" => move_next_long_word_end,
         "I" => page_cursor_half_up,
         "K" => page_cursor_half_down,
         "home" => goto_line_start,
         "end" => goto_line_end,
-        "G" => goto_line,
 
         // Editing
-        "h" => insert_mode,
-        "H" => insert_at_line_start,
-        "a" => append_mode,
-        "A" => insert_at_line_end,
+        "u" => insert_mode,
+        "U" => insert_at_line_start,
+        "o" => append_mode,
+        "O" => insert_at_line_end,
         "n" => open_below,
         "N" => open_above,
         "d" => delete_selection,
@@ -87,15 +86,14 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
             "R" => rsearch,
             "w" => goto_word,
             "m" => match_brackets,
-            "u" => find_prev_char,
-            "o" => find_next_char,
-            "U" => extend_prev_char,
-            "O" => extend_next_char,
-            "j" => goto_line_start,
+            "g" => find_prev_char,
+            "h" => find_next_char,
+            "G" => extend_prev_char,
+            "H" => extend_next_char,
             "l" => goto_line_end,
-            "h" => goto_first_nonwhitespace,
-            "g" => goto_file_start,
-            "G" => goto_last_line,
+            "j" => goto_first_nonwhitespace,
+            "u" => goto_file_start,
+            "o" => goto_last_line,
             "t" => goto_window_top,
             "c" => goto_window_center,
             "b" => goto_window_bottom,
@@ -103,9 +101,10 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
             "A" => goto_last_modified_file,
             "." => goto_last_modification,
             "p" => goto_file,
+            "n" => goto_line,
         },
 
-        "u" => { "Prev / Next"
+        "g" => { "Prev / Next"
             "e" => undo,
             "h" => earlier,
             "s" => search_prev,
@@ -122,7 +121,7 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
             "b" => goto_previous_buffer,
             "v" => page_up,
         },
-        "o" => { "Prev / Next"
+        "h" => { "Prev / Next"
             "e" => redo,
             "h" => later,
             "s" => search_next,
@@ -140,7 +139,7 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
             "v" => page_down,
         },
 
-        "U" => { "Extend Prev / Next"
+        "G" => { "Extend Prev / Next"
             "s" => extend_search_prev,
             "f" => extend_goto_prev_function,
             "a" => extend_goto_prev_parameter,
@@ -150,7 +149,7 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
             "d" => extend_goto_prev_diag,
             "g" => extend_goto_prev_change,
         },
-        "O" => { "Extend Prev / Next"
+        "H" => { "Extend Prev / Next"
             "s" => extend_search_next,
             "f" => extend_goto_next_function,
             "a" => extend_goto_next_parameter,
@@ -165,10 +164,10 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
             "r" => select_regex,
             "R" => split_selection,
             "n" => split_selection_on_newline,
-            "u" => rotate_selections_backward,
-            "o" => rotate_selections_forward,
-            "U" => rotate_selection_contents_backward,
-            "O" => rotate_selection_contents_forward,
+            "g" => rotate_selections_backward,
+            "h" => rotate_selections_forward,
+            "G" => rotate_selection_contents_backward,
+            "H" => rotate_selection_contents_forward,
             "c" => copy_selection_on_next_line,
             "C" => copy_selection_on_prev_line,
             "f" => flip_selections,
@@ -201,6 +200,7 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
             "c" => rename_symbol,
             "a" => code_action,
             "f" => format_selections,
+            "F" => format_buffer,
             "s" => select_references_to_symbol_under_cursor,
         },
 
@@ -251,7 +251,7 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
         "C-v" => paste_clipboard_after,
         "C-s" => save_file,
         "C-q" => quit_view,
-        "C-i" | "tab" => jump_forward, // tab == <C-i>
+        "tab" => add_newline_below,
         "C-o" => jump_backward,
         "C-z" => suspend,
     });
@@ -262,9 +262,9 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
         "left" => extend_char_left,
         "right" => extend_char_right,
         "j" => extend_prev_word_start,
-        "l" => extend_next_word_start,
+        "l" => extend_next_word_end,
         "J" => extend_prev_long_word_start,
-        "L" => extend_next_long_word_start,
+        "L" => extend_next_long_word_end,
 
         "home" => extend_to_line_start,
         "end" => extend_to_line_end,
@@ -274,21 +274,21 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
         "." => repeat,
 
         "space" => { "Portal"
-            "u" => extend_prev_char,
-            "o" => extend_next_char,
-            "U" => extend_prev_char,
-            "O" => extend_next_char,
+            "g" => extend_prev_char,
+            "h" => extend_next_char,
+            "G" => extend_prev_char,
+            "H" => extend_next_char,
             "w" => extend_to_word,
-            "j" => extend_to_line_start,
+            "j" => extend_to_first_nonwhitespace,
             "l" => extend_to_line_end,
-            "g" => extend_to_file_start,
-            "G" => extend_to_last_line,
+            "u" => extend_to_file_start,
+            "o" => extend_to_last_line,
         },
         "t" => { "Tree"
             "e" => extend_parent_node_end,
             "b" => extend_parent_node_start,
         },
-        "u" => { "Prev / Next"
+        "g" => { "Prev / Next"
             "s" => extend_search_prev,
             "f" => extend_goto_prev_function,
             "a" => extend_goto_prev_parameter,
@@ -298,7 +298,7 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
             "d" => extend_goto_prev_diag,
             "g" => extend_goto_prev_change,
         },
-        "o" => { "Prev / Next"
+        "h" => { "Prev / Next"
             "s" => extend_search_next,
             "f" => extend_goto_next_function,
             "a" => extend_goto_next_parameter,
@@ -312,8 +312,16 @@ pub fn default() -> HashMap<Mode, KeyTrie> {
     let insert = keymap!({ "Insert mode"
         "esc" => normal_mode,
 
-        "C-s" => commit_undo_checkpoint,
-        "C-x" => completion,
+        "C-s" => save_file,
+        "C-q" => quit_view,
+        "C-c" => yank_to_clipboard,
+        "C-x" => cut_to_clipboard,
+        "C-v" => paste_clipboard_after,
+        "C-z" => undo,
+        "C-left" => move_prev_word_start,
+        "C-right" => move_next_word_start,
+        "C-backspace" => delete_word_backward,
+        "C-del" => delete_word_forward,
         "C-r" => insert_register,
 
         "C-w" | "A-backspace" => delete_word_backward,

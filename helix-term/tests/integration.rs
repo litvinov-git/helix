@@ -11,7 +11,7 @@ mod test {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn hello_world() -> anyhow::Result<()> {
-        test(("#[\n|]#", "hhello world<esc>", "hello world#[|\n]#")).await?;
+        test(("#[\n|]#", "uhello world<esc>", "hello world#[|\n]#")).await?;
         Ok(())
     }
 

@@ -512,6 +512,7 @@ impl MappableCommand {
         yank_to_clipboard, "Yank selections to clipboard",
         cut_to_clipboard, "Cut selections to clipboard",
         save_file, "Write changes to disk",
+        format_buffer, "Format the entire file",
         quit_view, "Close the current view",
         yank_to_primary_clipboard, "Yank selections to primary clipboard",
         yank_joined, "Join and yank selections",
@@ -5360,6 +5361,10 @@ fn cut_to_clipboard(cx: &mut Context) {
 
 fn save_file(cx: &mut Context) {
     run_typable(cx, ":write");
+}
+
+fn format_buffer(cx: &mut Context) {
+    run_typable(cx, ":format");
 }
 
 fn quit_view(cx: &mut Context) {

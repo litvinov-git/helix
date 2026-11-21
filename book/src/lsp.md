@@ -19,15 +19,15 @@ keys are listed below.
 
 | Feature | Default key / command |
 | --- | --- |
-| Diagnostics — shown inline and in the gutter | navigate with `[d` / `]d`; `Space-d` / `Space-D` open the document / workspace pickers |
-| Completion | automatic while typing; `Ctrl-x` triggers it manually |
-| Hover documentation | `Space-k` |
+| Diagnostics — shown inline and in the gutter | navigate with `gd` / `hd`; `fd` / `fD` open the document / workspace pickers |
+| Completion | automatic while typing; the `completion` command has no default key |
+| Hover documentation | `sh` |
 | Signature help (parameter hints) | automatic while typing arguments |
-| Goto definition / declaration / type / references / implementation | `gd` / `gD` / `gy` / `gr` / `gi` |
-| Rename symbol | `Space-r` |
-| Code actions | `Space-a` |
-| Document / workspace symbols | `Space-s` / `Space-S` |
-| Format document | `:format`, or set `auto-format` to format on save |
+| Goto definition / declaration / type / references / implementation | `sd` / `sD` / `st` / `sr` / `si` |
+| Rename symbol | `sc` |
+| Code actions | `sa` |
+| Document / workspace symbols | `fs` / `fS` |
+| Format document | `sF` / `:format`, or set `auto-format` to format on save |
 | Inlay hints | enable with `display-inlay-hints` (see below) |
 
 ## Configuration
