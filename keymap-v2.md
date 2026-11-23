@@ -259,7 +259,8 @@ Insert mode keeps the upstream bindings (`esc`, `C-r`, `C-w` / `A-backspace`, `A
 - `save_file`, `quit_view` and `format_buffer` are thin static wrappers that run the `:write`, `:quit` and `:format` typable commands (`run_typable`).
 - `cut_to_clipboard` yanks to `+` and then runs `delete_selection_noyank`.
 - Only static commands can be bound in the `keymap!` macro.
-- The keymap tests (`helix-term/tests/test/**`) are written against these default keys. Tests of commands that have no default key bind them through `test_extra_keys` (`A-s` = `save_selection`, `A-t` / `A-T` = `find_till_char` / `till_prev_char`).
+- `goto_definition` / `goto_implementation` request their own locations and, when the language servers return none, run the other request as a followup job (`goto_single_job` with a fallback in `commands/lsp.rs`); `sD` / `st` / `sr` have no fallback.
+- The keymap tests (`helix-term/tests/test/**`) are written against these default keys. Tests of commands that have no default key bind them through `test_extra_keys` (`A-s` = `save_selection`, `A-t` / `A-T` = `find_till_char` / `till_prev_char`, `A-c` / `A-C` = `copy_selection_on_next_line` / `copy_selection_on_prev_line`). The auto pairs, indent and smart tab tests are about other behavior and use `u` / `o` only to enter insert mode, so they run with `u` / `o` bound to the plain `insert_mode` / `append_mode` (`plain_insert_config` / `test_plain_insert`).
 
 ## Open questions for the owner
 
