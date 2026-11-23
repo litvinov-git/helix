@@ -81,7 +81,7 @@ Column 0 (`goto_line_start`) has no key apart from `home`.
 |---|---|---|
 | `ge` / `he` | undo / redo | Undo / redo |
 | `gE` / `hE` | earlier / later | Earlier / later in the undo history |
-| `gg` / `hh` | find_prev_char_ignore_case / find_next_char_ignore_case | Move to the previous / next occurrence of a character, ignoring case (then the character key) |
+| `gg` / `hh` | find_prev_char_ignore_case / find_next_char_ignore_case | Move the cursor to the previous / next occurrence of a character, ignoring case (then the character key); only moves, the selection is cleared down to a cursor on the found character |
 | `gs` / `hs` | search_prev / search_next | Previous / next search result (kept fuzzy matches, else regex) |
 | `gd` / `hd` | goto_prev_diag / goto_next_diag | Previous / next diagnostic |
 | `gD` / `hD` | goto_first_diag / goto_last_diag | First / last diagnostic |
@@ -108,7 +108,7 @@ Column 0 (`goto_line_start`) has no key apart from `home`.
 | `Gp` / `Hp` | extend_goto_prev_paragraph / extend_goto_next_paragraph | Extend by previous / next paragraph |
 | `Gd` / `Hd` | extend_goto_prev_diag / extend_goto_next_diag | Extend by previous / next diagnostic |
 | `GG` / `HG` | extend_goto_prev_change / extend_goto_next_change | Extend by previous / next git change |
-| `Gg` / `Hh` | extend_prev_char_ignore_case / extend_next_char_ignore_case | Extend to the previous / next occurrence of a character, ignoring case |
+| `Gg` / `Hh` | extend_prev_char_ignore_case / extend_next_char_ignore_case | Extend the selection to the previous / next occurrence of a character, ignoring case (keeps the anchor) |
 
 The plain `g` / `h` motions only move the cursor in normal mode. The `extend_goto_*` commands share their implementation with the plain ones through an `extend: bool` parameter (`goto_ts_object_impl`, `goto_next_diag_impl`, `goto_next_change_impl`, ...).
 
@@ -129,6 +129,7 @@ The plain `g` / `h` motions only move the cursor in normal mode. The `extend_got
 | `m=` | align_selections | Align selections in columns |
 | `mj` / `mJ` | join_selections / join_selections_space | Join lines / join lines with a space |
 | `ma` / `mi` | select_textobject_around / select_textobject_inner | Select around / inside a textobject (then the object key) |
+| `mw` / `mW` | select_word / select_long_word | Select the word / WORD under the cursor (shortcut for `miw` / `miW`, no object key) |
 | `ms` / `mc` / `md` | surround_add / surround_replace / surround_delete | Surround: add / change (replace) / delete |
 
 ### Symbol (`s`): everything the language server provides, except pickers
@@ -182,11 +183,11 @@ The plain `g` / `h` motions only move the cursor in normal mode. The `extend_got
 | Keys | Command | Action |
 |---|---|---|
 | `i` / `k` | move_visual_line_up / move_visual_line_down | Move up / down (visual line) |
-| `j` / `l` | move_prev_word_start / move_next_word_end | Previous word start / next word end |
-| `J` / `L` | move_prev_long_word_start / move_next_long_word_end | Previous WORD start / next WORD end |
+| `j` / `l` | cursor_prev_word_start / cursor_next_word_end | Move the cursor to the previous word start / next word end (does not select the span) |
+| `J` / `L` | cursor_prev_long_word_start / cursor_next_long_word_end | Move the cursor to the previous WORD start / next WORD end (does not select the span) |
 | `I` / `K` | page_cursor_half_up_centered / page_cursor_half_down_centered | Half page up / down, then the cursor line is centered in the view (smooth, fast scrolling: the cursor stays in the middle) |
-| `u` / `U` | insert_mode / insert_at_line_start | Insert before the selection / at line start |
-| `o` / `O` | append_mode / insert_at_line_end | Append after the selection / at line end |
+| `u` / `U` | insert_before_selection / insert_at_line_start | Insert at the start of the selection, which is cleared (each selection becomes a cursor) / at line start |
+| `o` / `O` | append_after_selection / insert_at_line_end | Append after the end of the selection, which is cleared (each selection becomes a cursor) / at line end |
 | `n` / `N` | open_below / open_above | Open a new line below / above |
 | `tab` | add_newline_below | Add a new line below, stay in normal mode |
 | `/` / `?` | toggle_comments / toggle_block_comments | Toggle comments / block comments |
@@ -206,11 +207,13 @@ The plain `g` / `h` motions only move the cursor in normal mode. The `extend_got
 | `\|` / `!` / `$` | shell_pipe / shell_insert_output / shell_keep_pipe | Shell pipe / insert output / keep where the command succeeds |
 | `:` | command_mode | Command mode |
 
-`page_cursor_half_*_centered` run `page_cursor_half_up` / `page_cursor_half_down` (`scroll(.., sync_cursor = true)`, which extends the selection in select mode) and then `align_view_center`. `find_*_char_ignore_case` / `extend_*_char_ignore_case` are the `find_char` family with a case-insensitive comparison.
+`page_cursor_half_*_centered` run `page_cursor_half_up` / `page_cursor_half_down` (`scroll(.., sync_cursor = true)`, which extends the selection in select mode) and then `align_view_center`. `find_*_char_ignore_case` / `extend_*_char_ignore_case` are the `find_char` family with a case-insensitive comparison; the plain ones leave a cursor on the found character instead of selecting the span (upstream `f` selects it), the extend ones keep upstream's extending behavior. `insert_before_selection` / `append_after_selection` are `insert_mode` / `append_mode` with every selection reduced to the one character the insertion happens at (the same result as for a one character selection). `select_word` / `select_long_word` run `select_textobject_inner` for `w` / `W` without waiting for the object key.
+
+The word motions `j` `l` `J` `L` only move the cursor (`cursor_prev_word_start`, `cursor_next_word_end`, `cursor_prev_long_word_start`, `cursor_next_long_word_end`: the upstream word motion followed by collapsing the selection to the cursor). The upstream commands that select the span passed over (`move_prev_word_start`, `move_next_word_end`, `move_prev_long_word_start`, `move_next_long_word_end`) stay unbound; in select mode `j` `l` `J` `L` extend the selection as before.
 
 Other keys kept from upstream: arrow keys (`up` / `down` = visual line motions, which do not scroll, `left` / `right` = char motions), `home` / `end`, `pageup` / `C-b` and `pagedown` / `C-f` (page up / down), `C-u` / `C-d` (half page), `C-o` (jump_backward), `C-z` (suspend), `esc` (normal_mode).
 
-Unbound on purpose: `a A h H e E w b W B t T f F s S C G X` and `u`/`o` as prefixes (`h` and `G` are prefixes now), the DAP debugger submenu, view scrolling (`scroll_up` / `scroll_down`), `add_newline_above`, `paste_clipboard_before`, `save_selection`, the case-sensitive character finds (`find_next_char`, `find_prev_char`, `extend_next_char`, `extend_prev_char`), till-character (`find_till_char`, `till_prev_char`), `copy_selection_on_next_line` / `copy_selection_on_prev_line` (`yp` covers it), `completion` outside insert mode, the stock `[` / `]` menus and the `C-w` window mode. The fuzzy next / prev family (`fuzzy_search_next`, `fuzzy_search_prev`, `extend_fuzzy_search_next`, `extend_fuzzy_search_prev`) is unbound because `gs` / `hs` / `Gs` / `Hs` already reach it.
+Unbound on purpose: the span-selecting word motions (see above), `a A h H e E w b W B t T f F s S C G X` and `u`/`o` as prefixes (`h` and `G` are prefixes now), the DAP debugger submenu, view scrolling (`scroll_up` / `scroll_down`), `add_newline_above`, `paste_clipboard_before`, `save_selection`, the case-sensitive character finds (`find_next_char`, `find_prev_char`, `extend_next_char`, `extend_prev_char`), till-character (`find_till_char`, `till_prev_char`), `copy_selection_on_next_line` / `copy_selection_on_prev_line` (`yp` covers it), `completion` outside insert mode, the stock `[` / `]` menus and the `C-w` window mode. The fuzzy next / prev family (`fuzzy_search_next`, `fuzzy_search_prev`, `extend_fuzzy_search_next`, `extend_fuzzy_search_prev`) is unbound because `gs` / `hs` / `Gs` / `Hs` already reach it.
 
 ## Select mode
 

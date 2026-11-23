@@ -2,6 +2,12 @@ use helix_core::{auto_pairs::DEFAULT_PAIRS, hashmap};
 
 use super::*;
 
+/// The tests of this file are about the auto pairs, not about the selection `u` / `o` leave, so
+/// they use the plain `insert_mode` / `append_mode`.
+async fn test<T: Into<TestCase>>(test_case: T) -> anyhow::Result<()> {
+    test_plain_insert(test_case).await
+}
+
 const LINE_END: &str = helix_core::NATIVE_LINE_ENDING.as_str();
 
 fn differing_pairs() -> impl Iterator<Item = &'static (char, char)> {

@@ -703,7 +703,13 @@ async fn test_indent_with_spaces() -> anyhow::Result<()> {
     ];
 
     for test in tests {
-        test_with_config(AppBuilder::new().with_file("foo.rs", None), test).await?;
+        test_with_config(
+            AppBuilder::new()
+                .with_config(plain_insert_config())
+                .with_file("foo.rs", None),
+            test,
+        )
+        .await?;
     }
 
     Ok(())

@@ -22,8 +22,8 @@ async fn insert_mode_cursor_position() -> anyhow::Result<()> {
 /// Range direction is preserved when escaping insert mode to normal
 #[tokio::test(flavor = "multi_thread")]
 async fn insert_to_normal_mode_cursor_position() -> anyhow::Result<()> {
-    test(("#[f|]#oo\n", "v<right><right>mf<esc>", "#[|foo]#\n")).await?;
-    test((
+    test_plain_insert(("#[f|]#oo\n", "v<right><right>mf<esc>", "#[|foo]#\n")).await?;
+    test_plain_insert((
         indoc! {"\
                 #[f|]#oo
                 #(b|)#ar"
@@ -36,7 +36,7 @@ async fn insert_to_normal_mode_cursor_position() -> anyhow::Result<()> {
     ))
     .await?;
 
-    test((
+    test_plain_insert((
         indoc! {"\
                 #[f|]#oo
                 #(b|)#ar"
@@ -49,7 +49,7 @@ async fn insert_to_normal_mode_cursor_position() -> anyhow::Result<()> {
     ))
     .await?;
 
-    test((
+    test_plain_insert((
         indoc! {"\
                 #[f|]#oo
                 #(b|)#ar"
@@ -436,10 +436,10 @@ async fn cursor_position_newly_opened_file() -> anyhow::Result<()> {
 #[tokio::test(flavor = "multi_thread")]
 async fn cursor_position_append_eof() -> anyhow::Result<()> {
     // Selection is forwards
-    test(("#[foo|]#", "obar<esc>", "#[foobar|]#\n")).await?;
+    test_plain_insert(("#[foo|]#", "obar<esc>", "#[foobar|]#\n")).await?;
 
     // Selection is backwards
-    test(("#[|foo]#", "obar<esc>", "#[foobar|]#\n")).await?;
+    test_plain_insert(("#[|foo]#", "obar<esc>", "#[foobar|]#\n")).await?;
 
     Ok(())
 }
@@ -550,10 +550,10 @@ async fn select_mode_tree_sitter_prev_function_goes_backwards_to_object() -> any
 
 #[tokio::test(flavor = "multi_thread")]
 async fn find_char() -> anyhow::Result<()> {
-    test(("he#[l|]#lo\nhello", "hhl", "he#[ll|]#o\nhello")).await?;
-    test(("hel#[l|]#o\nhello", "hhl", "hel#[lo\nhel|]#lo")).await?;
+    test(("he#[l|]#lo\nhello", "hhl", "hel#[l|]#o\nhello")).await?;
+    test(("hel#[l|]#o\nhello", "hhl", "hello\nhe#[l|]#lo")).await?;
     test(("hel#[l|]#o\nhello", "hhx", "hel#[l|]#o\nhello")).await?;
-    test(("he#[l|]#lo\nhello", "2hhl", "he#[llo\nhel|]#lo")).await?;
+    test(("he#[l|]#lo\nhello", "2hhl", "hello\nhe#[l|]#lo")).await?;
     test(("#[h|]#ello\nhello", "9hhl", "#[h|]#ello\nhello")).await?;
 
     test_extra_keys(("h#[e|]#llo\nhello", "<A-t>l", "h#[el|]#lo\nhello")).await?;
@@ -563,10 +563,10 @@ async fn find_char() -> anyhow::Result<()> {
     test_extra_keys(("he#[l|]#lo\nhello", "2<A-t>l", "he#[llo\nhel|]#lo")).await?;
     test_extra_keys(("#[h|]#ello\nhello", "9<A-t>l", "#[h|]#ello\nhello")).await?;
 
-    test(("hello\nhel#[l|]#o", "ggl", "hello\nhe#[|ll]#o")).await?;
-    test(("hello\nhe#[l|]#lo", "ggl", "hel#[|lo\nhel]#lo")).await?;
+    test(("hello\nhel#[l|]#o", "ggl", "hello\nhe#[l|]#lo")).await?;
+    test(("hello\nhe#[l|]#lo", "ggl", "hel#[l|]#o\nhello")).await?;
     test(("hello\n#[h|]#ello", "ggx", "hello\n#[h|]#ello")).await?;
-    test(("hello\nhel#[l|]#o", "2ggl", "hel#[|lo\nhell]#o")).await?;
+    test(("hello\nhel#[l|]#o", "2ggl", "hel#[l|]#o\nhello")).await?;
     test(("hello\nhell#[o|]#", "9ggl", "hello\nhell#[o|]#")).await?;
 
     test_extra_keys(("hello\nhell#[o|]#", "<A-T>l", "hello\nhel#[|lo]#")).await?;
@@ -581,10 +581,10 @@ async fn find_char() -> anyhow::Result<()> {
 
 #[tokio::test(flavor = "multi_thread")]
 async fn find_char_ignore_case() -> anyhow::Result<()> {
-    test(("#[h|]#ello World", "hhw", "#[hello W|]#orld")).await?;
-    test(("#[h|]#ello World", "hhW", "#[hello W|]#orld")).await?;
-    test(("hello Wor#[l|]#d", "ggH", "#[|hello Worl]#d")).await?;
-    test(("#[h|]#ello World", "2hho", "#[hello Wo|]#rld")).await?;
+    test(("#[h|]#ello World", "hhw", "hello #[W|]#orld")).await?;
+    test(("#[h|]#ello World", "hhW", "hello #[W|]#orld")).await?;
+    test(("hello Wor#[l|]#d", "ggH", "#[h|]#ello World")).await?;
+    test(("#[h|]#ello World", "2hho", "hello W#[o|]#rld")).await?;
     // The extending versions keep the anchor of the selection.
     test(("#[he|]#llo World", "Hhw", "#[hello W|]#orld")).await?;
     test(("hello #[Wo|]#rld", "GgH", "#[|hello W]#orld")).await?;
@@ -593,11 +593,11 @@ async fn find_char_ignore_case() -> anyhow::Result<()> {
 
 #[tokio::test(flavor = "multi_thread")]
 async fn find_char_line_ending() -> anyhow::Result<()> {
-    test_extra_keys(("on#[e|]#\ntwo\n", "hh<ret>", "on#[e\n|]#two\n")).await?;
-    test_extra_keys(("one#[\n|]#two\n", "hh<ret>", "one#[\ntwo\n|]#")).await?;
-    test_extra_keys(("one\n#[t|]#wo\n", "hh<ret>", "one\n#[two\n|]#")).await?;
+    test_extra_keys(("on#[e|]#\ntwo\n", "hh<ret>", "one#[\n|]#two\n")).await?;
+    test_extra_keys(("one#[\n|]#two\n", "hh<ret>", "one\ntwo#[\n|]#")).await?;
+    test_extra_keys(("one\n#[t|]#wo\n", "hh<ret>", "one\ntwo#[\n|]#")).await?;
     test_extra_keys(("one#[\n|]#", "hh<ret>", "one#[\n|]#")).await?;
-    test_extra_keys(("#[o|]#ne\ntwo\n", "2hh<ret>", "#[one\ntwo\n|]#")).await?;
+    test_extra_keys(("#[o|]#ne\ntwo\n", "2hh<ret>", "one\ntwo#[\n|]#")).await?;
     test_extra_keys(("#[o|]#ne\ntwo\n", "9hh<ret>", "#[o|]#ne\ntwo\n")).await?;
 
     test_extra_keys(("o#[n|]#e\ntwo\n", "<A-t><ret>", "o#[ne|]#\ntwo\n")).await?;
@@ -611,24 +611,24 @@ async fn find_char_line_ending() -> anyhow::Result<()> {
     test_extra_keys((
         "one\ntwo\n#[t|]#hree\n",
         "gg<ret>",
-        "one\ntwo#[|\nt]#hree\n",
+        "one\ntwo#[\n|]#three\n",
     ))
     .await?;
     test_extra_keys((
         "one\ntwo#[\n|]#three\n",
         "gg<ret>",
-        "one#[|\ntwo\n]#three\n",
+        "one#[\n|]#two\nthree\n",
     ))
     .await?;
     test_extra_keys((
         "one\ntw#[o|]#\nthree\n",
         "gg<ret>",
-        "one#[|\ntwo]#\nthree\n",
+        "one#[\n|]#two\nthree\n",
     ))
     .await?;
     test_extra_keys(("o#[n|]#e\n", "gg<ret>", "o#[n|]#e\n")).await?;
     test_extra_keys(("#[o|]#ne\n", "gg<ret>", "#[o|]#ne\n")).await?;
-    test_extra_keys(("one\ntwo\nth#[r|]#ee\n", "2gg\n", "one#[|\ntwo\nthr]#ee\n")).await?;
+    test_extra_keys(("one\ntwo\nth#[r|]#ee\n", "2gg\n", "one#[\n|]#two\nthree\n")).await?;
     test_extra_keys(("one\ntwo\nth#[r|]#ee\n", "9gg\n", "one\ntwo\nth#[r|]#ee\n")).await?;
 
     test_extra_keys((
@@ -691,8 +691,8 @@ async fn find_char_line_ending() -> anyhow::Result<()> {
         "hh<ret>2<A-t><ret><space>j<A-T><ret>gg<ret>",
         indoc! {
             "\
-            one#[|
-            t]#wo
+            one#[
+            |]#two
             three"
         },
     ))
@@ -712,8 +712,8 @@ async fn repeat_find_char() -> anyhow::Result<()> {
         "hht.",
         indoc! {
             "\
-            one #[two
-            one t|]#wo"
+            one two
+            one #[t|]#wo"
         },
     ))
     .await?;
@@ -728,8 +728,8 @@ async fn repeat_find_char() -> anyhow::Result<()> {
         "hh<ret>.",
         indoc! {
             "\
-            one two#[
             one two
+            one two#[
             |]#"
         },
     ))
@@ -745,8 +745,8 @@ async fn repeat_find_char() -> anyhow::Result<()> {
         "hhthh<ret>.",
         indoc! {
             "\
-            one two#[
             one two
+            one two#[
             |]#"
         },
     ))
@@ -944,4 +944,38 @@ async fn shrink_selection_after_edit() -> anyhow::Result<()> {
         ),
     )
     .await
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn word_motions_only_move_the_cursor() -> anyhow::Result<()> {
+    test(("#[h|]#ello world", "l", "hell#[o|]# world")).await?;
+    test(("hello wor#[l|]#d", "j", "hello #[w|]#orld")).await?;
+    test(("#[f|]#oo-bar baz", "L", "foo-ba#[r|]# baz")).await?;
+    test(("foo-bar b#[a|]#z", "J", "foo-bar #[b|]#az")).await?;
+    test(("#[h|]#ello world foo", "2l", "hello worl#[d|]# foo")).await?;
+    // Select mode keeps extending.
+    test(("#[h|]#ello world", "vl", "#[hello|]# world")).await?;
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn select_word_shortcuts() -> anyhow::Result<()> {
+    test(("hel#[l|]#o world", "mw", "#[hello|]# world")).await?;
+    test(("foo-ba#[r|]# baz", "mw", "foo-#[bar|]# baz")).await?;
+    test(("foo-ba#[r|]# baz", "mW", "#[foo-bar|]# baz")).await?;
+    test(("one two #[t|]#hree", "2mw", "one two #[three|]#")).await?;
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn insert_and_append_clear_the_selection() -> anyhow::Result<()> {
+    test(("he#[llo|]# world", "uX<esc>", "heX#[|l]#lo world")).await?;
+    test(("he#[llo|]# world", "oX<esc>", "helloX#[ |]#world")).await?;
+    test((
+        "#[he|]#llo #(wo|)#rld",
+        "uX<esc>",
+        "X#[|h]#ello X#(|w)#orld",
+    ))
+    .await?;
+    Ok(())
 }

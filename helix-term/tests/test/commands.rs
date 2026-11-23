@@ -473,7 +473,7 @@ async fn test_delete_word_forward() -> anyhow::Result<()> {
 
 #[tokio::test(flavor = "multi_thread")]
 async fn test_delete_char_forward() -> anyhow::Result<()> {
-    test((
+    test_plain_insert((
         indoc! {"\
                 #[abc|]#def
                 #(abc|)#ef
@@ -1238,7 +1238,7 @@ async fn repeat_command_with_following_keys() -> anyhow::Result<()> {
             "},
         "hhb.",
         indoc! {"\
-            a#[bcb|]#cb
+            abc#[b|]#cb
             "},
     ))
     .await?;

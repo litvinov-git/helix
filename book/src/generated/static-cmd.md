@@ -16,12 +16,12 @@
 | `copy_selection_on_next_line` | Copy selection on next line |  |
 | `copy_selection_on_prev_line` | Copy selection on previous line |  |
 | `move_next_word_start` | Move to start of next word | insert: `` <C-right> `` |
-| `move_prev_word_start` | Move to start of previous word | normal: `` j ``, insert: `` <C-left> `` |
-| `move_next_word_end` | Move to end of next word | normal: `` l `` |
+| `move_prev_word_start` | Move to start of previous word | insert: `` <C-left> `` |
+| `move_next_word_end` | Move to end of next word |  |
 | `move_prev_word_end` | Move to end of previous word |  |
 | `move_next_long_word_start` | Move to start of next long word |  |
-| `move_prev_long_word_start` | Move to start of previous long word | normal: `` J `` |
-| `move_next_long_word_end` | Move to end of next long word | normal: `` L `` |
+| `move_prev_long_word_start` | Move to start of previous long word |  |
+| `move_next_long_word_end` | Move to end of next long word |  |
 | `move_prev_long_word_end` | Move to end of previous long word |  |
 | `move_next_sub_word_start` | Move to start of next sub word |  |
 | `move_prev_sub_word_start` | Move to start of previous sub word |  |
@@ -68,6 +68,14 @@
 | `page_cursor_up` | Move page and cursor up |  |
 | `page_cursor_down` | Move page and cursor down |  |
 | `page_cursor_half_up` | Move page and cursor half up | normal: `` <C-u> ``, select: `` <C-u> `` |
+| `cursor_prev_word_start` | Move the cursor to previous word start | normal: `` j `` |
+| `cursor_next_word_end` | Move the cursor to next word end | normal: `` l `` |
+| `cursor_prev_long_word_start` | Move the cursor to previous WORD start | normal: `` J `` |
+| `cursor_next_long_word_end` | Move the cursor to next WORD end | normal: `` L `` |
+| `insert_before_selection` | Insert at the start of the selection and clear it | normal: `` u ``, select: `` u `` |
+| `append_after_selection` | Append after the selection and clear it | normal: `` o ``, select: `` o `` |
+| `select_word` | Select the word under the cursor | normal: `` mw ``, select: `` mw `` |
+| `select_long_word` | Select the WORD under the cursor | normal: `` mW ``, select: `` mW `` |
 | `page_cursor_half_up_centered` | Move cursor half a page up and center the view on it | normal: `` I ``, select: `` I `` |
 | `page_cursor_half_down_centered` | Move cursor half a page down and center the view on it | normal: `` K ``, select: `` K `` |
 | `page_cursor_half_down` | Move page and cursor half down | normal: `` <C-d> ``, select: `` <C-d> `` |
@@ -109,8 +117,8 @@
 | `collapse_selection` | Collapse selection into single cursor | normal: `` ; ``, select: `` ; `` |
 | `flip_selections` | Flip selection cursor and anchor | normal: `` mf ``, select: `` mf `` |
 | `ensure_selections_forward` | Ensure all selections face forward | normal: `` mF ``, select: `` mF `` |
-| `insert_mode` | Insert before selection | normal: `` u ``, select: `` u `` |
-| `append_mode` | Append after selection | normal: `` o ``, select: `` o `` |
+| `insert_mode` | Insert before selection |  |
+| `append_mode` | Append after selection |  |
 | `command_mode` | Enter command mode | normal: `` : ``, select: `` : `` |
 | `file_picker` | Open file picker | normal: `` ff ``, select: `` ff `` |
 | `file_picker_in_current_buffer_directory` | Open file picker at current buffer's directory |  |

@@ -110,7 +110,7 @@ g goes to the previous one, h to the next one; each row is a pair.
 | --- | ----------- | ------- |
 | `ge` / `he` | Undo / redo | `undo` / `redo` |
 | `gE` / `hE` | Earlier / later in undo history | `earlier` / `later` |
-| `gg` / `hh` | Previous / next occurrence of a character, ignoring case | `find_prev_char_ignore_case` / `find_next_char_ignore_case` |
+| `gg` / `hh` | Move the cursor to the previous / next occurrence of a character, ignoring case (only a cursor is left, nothing is selected) | `find_prev_char_ignore_case` / `find_next_char_ignore_case` |
 | `gs` / `hs` | Previous / next search result (the kept fuzzy matches if there are any, otherwise the regex search) | `search_prev` / `search_next` |
 | `gd` / `hd` | Previous / next diagnostic | `goto_prev_diag` / `goto_next_diag` |
 | `gD` / `hD` | First / last diagnostic | `goto_first_diag` / `goto_last_diag` |
@@ -163,6 +163,7 @@ Create and manipulate selections.
 | `mt` | Trim whitespace from selection | `trim_selections` |
 | `m=` | Align selections in columns | `align_selections` |
 | `mj` / `mJ` | Join lines / join lines with a space | `join_selections` / `join_selections_space` |
+| `mw` / `mW` | Select the word / WORD under the cursor (shortcut for `miw` / `miW`) | `select_word` / `select_long_word` |
 | `ma` / `mi` | Select around / inside textobject, then the object key | `select_textobject_around` / `select_textobject_inner` |
 | `ms` / `mc` / `md` | Surround: add / replace / delete | `surround_add` / `surround_replace` / `surround_delete` |
 
@@ -233,11 +234,11 @@ The high-frequency core, no prefix.
 | Key | Description | Command |
 | --- | ----------- | ------- |
 | `i` / `k` | Move up / down (visual line) | `move_visual_line_up` / `move_visual_line_down` |
-| `j` / `l` | Previous word start / next word end | `move_prev_word_start` / `move_next_word_end` |
-| `J` / `L` | Previous WORD start / next WORD end | `move_prev_long_word_start` / `move_next_long_word_end` |
+| `j` / `l` | Move the cursor to the previous word start / next word end (does not select the span) | `cursor_prev_word_start` / `cursor_next_word_end` |
+| `J` / `L` | Move the cursor to the previous WORD start / next WORD end (does not select the span) | `cursor_prev_long_word_start` / `cursor_next_long_word_end` |
 | `I` / `K` | Half page up / down, then center the cursor line | `page_cursor_half_up_centered` / `page_cursor_half_down_centered` |
-| `u` / `U` | Insert before selection / at line start | `insert_mode` / `insert_at_line_start` |
-| `o` / `O` | Append after selection / at line end | `append_mode` / `insert_at_line_end` |
+| `u` / `U` | Insert at the start of the selection, clearing it / at line start | `insert_before_selection` / `insert_at_line_start` |
+| `o` / `O` | Append after the selection, clearing it / at line end | `append_after_selection` / `insert_at_line_end` |
 | `/` / `?` | Toggle comments / block comments | `toggle_comments` / `toggle_block_comments` |
 | `.` | Repeat the last command (the fork’s bindable repeat) | `repeat` |
 | `n` / `N` | Open new line below / above | `open_below` / `open_above` |

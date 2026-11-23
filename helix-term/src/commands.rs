@@ -377,6 +377,14 @@ impl MappableCommand {
         page_cursor_up, "Move page and cursor up",
         page_cursor_down, "Move page and cursor down",
         page_cursor_half_up, "Move page and cursor half up",
+        cursor_prev_word_start, "Move the cursor to previous word start",
+        cursor_next_word_end, "Move the cursor to next word end",
+        cursor_prev_long_word_start, "Move the cursor to previous WORD start",
+        cursor_next_long_word_end, "Move the cursor to next WORD end",
+        insert_before_selection, "Insert at the start of the selection and clear it",
+        append_after_selection, "Append after the selection and clear it",
+        select_word, "Select the word under the cursor",
+        select_long_word, "Select the WORD under the cursor",
         page_cursor_half_up_centered, "Move cursor half a page up and center the view on it",
         page_cursor_half_down_centered, "Move cursor half a page down and center the view on it",
         page_cursor_half_down, "Move page and cursor half down",
@@ -1279,6 +1287,26 @@ fn move_next_long_word_end(cx: &mut Context) {
     move_word_impl(cx, movement::move_next_long_word_end)
 }
 
+fn cursor_prev_word_start(cx: &mut Context) {
+    move_word_impl(cx, movement::move_prev_word_start);
+    collapse_selection(cx);
+}
+
+fn cursor_next_word_end(cx: &mut Context) {
+    move_word_impl(cx, movement::move_next_word_end);
+    collapse_selection(cx);
+}
+
+fn cursor_prev_long_word_start(cx: &mut Context) {
+    move_word_impl(cx, movement::move_prev_long_word_start);
+    collapse_selection(cx);
+}
+
+fn cursor_next_long_word_end(cx: &mut Context) {
+    move_word_impl(cx, movement::move_next_long_word_end);
+    collapse_selection(cx);
+}
+
 fn move_next_sub_word_start(cx: &mut Context) {
     move_word_impl(cx, movement::move_next_sub_word_start)
 }
@@ -1843,6 +1871,23 @@ fn find_char_impl(
             })
         } else {
             return;
+        };
+
+        // The case-insensitive finds only move the cursor: they do not select the span (as `f`
+        // does) unless they extend.
+        let motion: Motion = if ignore_case && !extend {
+            Box::new(move |editor: &mut Editor| {
+                motion(editor);
+                let (view, doc) = current!(editor);
+                let text = doc.text().slice(..);
+                let selection = doc
+                    .selection(view.id)
+                    .clone()
+                    .transform(|range| Range::point(range.cursor(text)));
+                doc.set_selection(view.id, selection);
+            })
+        } else {
+            motion
         };
 
         cx.editor.apply_motion(motion);
@@ -3601,6 +3646,36 @@ fn append_mode(cx: &mut Context) {
         Range::new(
             range.from(),
             graphemes::next_grapheme_boundary(doc.text().slice(..), range.to()),
+        )
+    });
+    doc.set_selection(view.id, selection);
+}
+
+// Like `insert_mode` / `append_mode`, but every selection is reduced to the one character the
+// insertion happens at, so the result is the same as for a one character selection.
+fn insert_before_selection(cx: &mut Context) {
+    insert_mode(cx);
+    let (view, doc) = current!(cx.editor);
+    let text = doc.text().slice(..);
+    // `insert_mode` left every range backward, with the head at the start of the selection.
+    let selection = doc.selection(view.id).clone().transform(|range| {
+        Range::new(
+            graphemes::next_grapheme_boundary(text, range.head),
+            range.head,
+        )
+    });
+    doc.set_selection(view.id, selection);
+}
+
+fn append_after_selection(cx: &mut Context) {
+    append_mode(cx);
+    let (view, doc) = current!(cx.editor);
+    let text = doc.text().slice(..);
+    // `append_mode` left every range forward, with the head one character past the selection.
+    let selection = doc.selection(view.id).clone().transform(|range| {
+        Range::new(
+            graphemes::prev_grapheme_boundary(text, range.head),
+            range.head,
         )
     });
     doc.set_selection(view.id, selection);
@@ -6898,6 +6973,27 @@ fn select_textobject_around(cx: &mut Context) {
 
 fn select_textobject_inner(cx: &mut Context) {
     select_textobject(cx, textobject::TextObject::Inside);
+}
+
+fn select_word(cx: &mut Context) {
+    select_word_impl(cx, false)
+}
+
+fn select_long_word(cx: &mut Context) {
+    select_word_impl(cx, true)
+}
+
+/// `select_textobject_inner` for `w` / `W` without waiting for the object key.
+fn select_word_impl(cx: &mut Context, long: bool) {
+    let count = cx.count();
+    cx.editor.apply_motion(move |editor: &mut Editor| {
+        let (view, doc) = current!(editor);
+        let text = doc.text().slice(..);
+        let selection = doc.selection(view.id).clone().transform(|range| {
+            textobject::textobject_word(text, range, textobject::TextObject::Inside, count, long)
+        });
+        doc.set_selection(view.id, selection);
+    });
 }
 
 fn select_textobject(cx: &mut Context, objtype: textobject::TextObject) {

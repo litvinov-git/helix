@@ -295,6 +295,34 @@ pub async fn test_extra_keys<T: Into<TestCase>>(test_case: T) -> anyhow::Result<
     test_with_config(AppBuilder::new().with_config(config), test_case).await
 }
 
+/// A config with `u` / `o` bound to the plain `insert_mode` / `append_mode`, which keep the
+/// selected range (the default `u` / `o` clear the selection first).
+pub fn plain_insert_config() -> Config {
+    let keys = String::from(
+        r#"
+        [keys.normal]
+        u = "insert_mode"
+        o = "append_mode"
+        "#,
+    );
+    let mut config = Config::load(
+        Ok(&keys),
+        Err(helix_term::config::ConfigLoadError::default()),
+    )
+    .unwrap();
+    config.editor = test_editor_config();
+    config
+}
+
+/// Test with the plain `insert_mode` / `append_mode` on `u` / `o`.
+pub async fn test_plain_insert<T: Into<TestCase>>(test_case: T) -> anyhow::Result<()> {
+    test_with_config(
+        AppBuilder::new().with_config(plain_insert_config()),
+        test_case,
+    )
+    .await
+}
+
 pub async fn test<T: Into<TestCase>>(test_case: T) -> anyhow::Result<()> {
     test_with_config(AppBuilder::default(), test_case).await
 }
