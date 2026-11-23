@@ -273,7 +273,8 @@ pub async fn test_with_config<T: Into<TestCase>>(
 }
 
 /// Test with a few extra keys bound for commands that have no default key
-/// (`A-s` = `save_selection`, `A-t` / `A-T` = `find_till_char` / `till_prev_char`).
+/// (`A-s` = `save_selection`, `A-t` / `A-T` = `find_till_char` / `till_prev_char`,
+/// `A-c` / `A-C` = `copy_selection_on_next_line` / `copy_selection_on_prev_line`).
 pub async fn test_extra_keys<T: Into<TestCase>>(test_case: T) -> anyhow::Result<()> {
     let keys = String::from(
         r#"
@@ -281,6 +282,8 @@ pub async fn test_extra_keys<T: Into<TestCase>>(test_case: T) -> anyhow::Result<
         "A-s" = "save_selection"
         "A-t" = "find_till_char"
         "A-T" = "till_prev_char"
+        "A-c" = "copy_selection_on_next_line"
+        "A-C" = "copy_selection_on_prev_line"
         "#,
     );
     let mut config = Config::load(

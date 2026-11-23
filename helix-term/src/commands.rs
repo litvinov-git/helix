@@ -358,6 +358,10 @@ impl MappableCommand {
         extend_next_char, "Extend to next occurrence of char",
         till_prev_char, "Move till previous occurrence of char",
         find_prev_char, "Move to previous occurrence of char",
+        find_next_char_ignore_case, "Move to next occurrence of char, ignoring case",
+        find_prev_char_ignore_case, "Move to previous occurrence of char, ignoring case",
+        extend_next_char_ignore_case, "Extend to next occurrence of char, ignoring case",
+        extend_prev_char_ignore_case, "Extend to previous occurrence of char, ignoring case",
         extend_till_prev_char, "Extend till previous occurrence of char",
         extend_prev_char, "Extend to previous occurrence of char",
         repeat_last_motion, "Repeat last motion",
@@ -373,6 +377,8 @@ impl MappableCommand {
         page_cursor_up, "Move page and cursor up",
         page_cursor_down, "Move page and cursor down",
         page_cursor_half_up, "Move page and cursor half up",
+        page_cursor_half_up_centered, "Move cursor half a page up and center the view on it",
+        page_cursor_half_down_centered, "Move cursor half a page down and center the view on it",
         page_cursor_half_down, "Move page and cursor half down",
         select_all, "Select whole document",
         select_regex, "Select all regex matches inside selections",
@@ -1767,6 +1773,16 @@ fn find_char_line_ending_motion(
 }
 
 fn find_char(cx: &mut Context, direction: Direction, inclusive: bool, extend: bool) {
+    find_char_impl(cx, direction, inclusive, extend, false)
+}
+
+fn find_char_impl(
+    cx: &mut Context,
+    direction: Direction,
+    inclusive: bool,
+    extend: bool,
+    ignore_case: bool,
+) {
     // TODO: count is reset to 1 before next key so we move it into the closure here.
     // Would be nice to carry over.
     let count = cx.count();
@@ -1800,7 +1816,13 @@ fn find_char(cx: &mut Context, direction: Direction, inclusive: bool, extend: bo
                         (false, Direction::Backward) => cursor_anchor.saturating_sub(1),
                     };
 
-                    search::find_nth_char(count, text, ch, search_start_pos, direction)
+                    let found = if ignore_case {
+                        let matcher = |c: &char| c.to_lowercase().eq(ch.to_lowercase());
+                        search::find_nth_char(count, text, matcher, search_start_pos, direction)
+                    } else {
+                        search::find_nth_char(count, text, ch, search_start_pos, direction)
+                    };
+                    found
                         // Exclusive search should stop on previous character
                         .map(|pos| match (inclusive, direction) {
                             (true, Direction::Forward) => pos,
@@ -1841,6 +1863,22 @@ fn extend_till_char(cx: &mut Context) {
 
 fn extend_next_char(cx: &mut Context) {
     find_char(cx, Direction::Forward, true, true)
+}
+
+fn find_next_char_ignore_case(cx: &mut Context) {
+    find_char_impl(cx, Direction::Forward, true, false, true)
+}
+
+fn find_prev_char_ignore_case(cx: &mut Context) {
+    find_char_impl(cx, Direction::Backward, true, false, true)
+}
+
+fn extend_next_char_ignore_case(cx: &mut Context) {
+    find_char_impl(cx, Direction::Forward, true, true, true)
+}
+
+fn extend_prev_char_ignore_case(cx: &mut Context) {
+    find_char_impl(cx, Direction::Backward, true, true, true)
 }
 
 fn till_prev_char(cx: &mut Context) {
@@ -2163,6 +2201,16 @@ fn page_cursor_half_down(cx: &mut Context) {
     let view = view!(cx.editor);
     let offset = view.inner_height() / 2;
     scroll(cx, offset, Direction::Forward, true);
+}
+
+fn page_cursor_half_up_centered(cx: &mut Context) {
+    page_cursor_half_up(cx);
+    align_view_center(cx);
+}
+
+fn page_cursor_half_down_centered(cx: &mut Context) {
+    page_cursor_half_down(cx);
+    align_view_center(cx);
 }
 
 #[allow(deprecated)]

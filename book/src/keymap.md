@@ -92,8 +92,6 @@ Jump anywhere: search jumps, characters, lines, screen, files.
 | `<space>R` | Regex search backward | `rsearch` |
 | `<space>w` | Jump to word by label | `goto_word` |
 | `<space>m` | Matching bracket | `match_brackets` |
-| `<space>g` / `<space>h` | Move to previous / next character | `find_prev_char` / `find_next_char` |
-| `<space>G` / `<space>H` | Extend selection to previous / next character | `extend_prev_char` / `extend_next_char` |
 | `<space>l` | Line end | `goto_line_end` |
 | `<space>j` | First non-blank of line | `goto_first_nonwhitespace` |
 | `<space>u` / `<space>o` | File start / end | `goto_file_start` / `goto_last_line` |
@@ -102,6 +100,7 @@ Jump anywhere: search jumps, characters, lines, screen, files.
 | `<space>.` | Last modification in file | `goto_last_modification` |
 | `<space>p` | Open file path under cursor | `goto_file` |
 | `<space>n` | Go to line number | `goto_line` |
+| `<space>left` / `<space>right` | Previous / next buffer | `goto_previous_buffer` / `goto_next_buffer` |
 
 ### Prev / Next mode
 
@@ -110,7 +109,8 @@ g goes to the previous one, h to the next one; each row is a pair.
 | Key | Description | Command |
 | --- | ----------- | ------- |
 | `ge` / `he` | Undo / redo | `undo` / `redo` |
-| `gh` / `hh` | Earlier / later in undo history | `earlier` / `later` |
+| `gE` / `hE` | Earlier / later in undo history | `earlier` / `later` |
+| `gg` / `hh` | Previous / next occurrence of a character, ignoring case | `find_prev_char_ignore_case` / `find_next_char_ignore_case` |
 | `gs` / `hs` | Previous / next search result (the kept fuzzy matches if there are any, otherwise the regex search) | `search_prev` / `search_next` |
 | `gd` / `hd` | Previous / next diagnostic | `goto_prev_diag` / `goto_next_diag` |
 | `gD` / `hD` | First / last diagnostic | `goto_first_diag` / `goto_last_diag` |
@@ -119,8 +119,8 @@ g goes to the previous one, h to the next one; each row is a pair.
 | `gt` / `ht` | Previous / next type or class | `goto_prev_class` / `goto_next_class` |
 | `gc` / `hc` | Previous / next comment | `goto_prev_comment` / `goto_next_comment` |
 | `gp` / `hp` | Previous / next paragraph | `goto_prev_paragraph` / `goto_next_paragraph` |
-| `gg` / `hg` | Previous / next git change | `goto_prev_change` / `goto_next_change` |
-| `gG` / `hG` | First / last git change | `goto_first_change` / `goto_last_change` |
+| `gG` / `hG` | Previous / next git change | `goto_prev_change` / `goto_next_change` |
+| `gm` / `hm` | First / last git change | `goto_first_change` / `goto_last_change` |
 | `gj` / `hj` | Jumplist back / forward | `jump_backward` / `jump_forward` |
 | `gb` / `hb` | Previous / next buffer | `goto_previous_buffer` / `goto_next_buffer` |
 | `gv` / `hv` | Page up / down | `page_up` / `page_down` |
@@ -138,7 +138,8 @@ The same motions as g / h, but the selection is extended by the object instead o
 | `Gc` / `Hc` | Extend by previous / next comment | `extend_goto_prev_comment` / `extend_goto_next_comment` |
 | `Gp` / `Hp` | Extend by previous / next paragraph | `extend_goto_prev_paragraph` / `extend_goto_next_paragraph` |
 | `Gd` / `Hd` | Extend by previous / next diagnostic | `extend_goto_prev_diag` / `extend_goto_next_diag` |
-| `Gg` / `Hg` | Extend by previous / next git change | `extend_goto_prev_change` / `extend_goto_next_change` |
+| `GG` / `HG` | Extend by previous / next git change | `extend_goto_prev_change` / `extend_goto_next_change` |
+| `Gg` / `Hh` | Extend to previous / next occurrence of a character, ignoring case | `extend_prev_char_ignore_case` / `extend_next_char_ignore_case` |
 
 ### Match mode
 
@@ -151,7 +152,6 @@ Create and manipulate selections.
 | `mn` | Split selection on newlines | `split_selection_on_newline` |
 | `mg` / `mh` | Rotate main selection back / forward | `rotate_selections_backward` / `rotate_selections_forward` |
 | `mG` / `mH` | Rotate selection contents back / forward | `rotate_selection_contents_backward` / `rotate_selection_contents_forward` |
-| `mc` / `mC` | Copy selection onto next / previous line | `copy_selection_on_next_line` / `copy_selection_on_prev_line` |
 | `mf` | Flip cursor and anchor | `flip_selections` |
 | `mF` | Ensure selection is forward | `ensure_selections_forward` |
 | `mm` | Merge selections | `merge_selections` |
@@ -164,7 +164,7 @@ Create and manipulate selections.
 | `m=` | Align selections in columns | `align_selections` |
 | `mj` / `mJ` | Join lines / join lines with a space | `join_selections` / `join_selections_space` |
 | `ma` / `mi` | Select around / inside textobject, then the object key | `select_textobject_around` / `select_textobject_inner` |
-| `ms` / `mS` / `md` | Surround: add / replace / delete | `surround_add` / `surround_replace` / `surround_delete` |
+| `ms` / `mc` / `md` | Surround: add / replace / delete | `surround_add` / `surround_replace` / `surround_delete` |
 
 ### Symbol mode
 
@@ -172,10 +172,10 @@ Everything the language server provides, except pickers.
 
 | Key | Description | Command |
 | --- | ----------- | ------- |
-| `sd` | Go to definition | `goto_definition` |
+| `sd` | Go to definition (the implementation if there is no definition) | `goto_definition` |
 | `sD` | Go to declaration | `goto_declaration` |
 | `st` | Go to type definition | `goto_type_definition` |
-| `si` | Go to implementation | `goto_implementation` |
+| `si` | Go to implementation (the definition if there is no implementation) | `goto_implementation` |
 | `sr` | Go to references | `goto_reference` |
 | `sh` | Hover documentation | `hover` |
 | `sc` | Rename symbol (change) | `rename_symbol` |
@@ -235,7 +235,7 @@ The high-frequency core, no prefix.
 | `i` / `k` | Move up / down (visual line) | `move_visual_line_up` / `move_visual_line_down` |
 | `j` / `l` | Previous word start / next word end | `move_prev_word_start` / `move_next_word_end` |
 | `J` / `L` | Previous WORD start / next WORD end | `move_prev_long_word_start` / `move_next_long_word_end` |
-| `I` / `K` | Half page up / down (cursor and view) | `page_cursor_half_up` / `page_cursor_half_down` |
+| `I` / `K` | Half page up / down, then center the cursor line | `page_cursor_half_up_centered` / `page_cursor_half_down_centered` |
 | `u` / `U` | Insert before selection / at line start | `insert_mode` / `insert_at_line_start` |
 | `o` / `O` | Append after selection / at line end | `append_mode` / `insert_at_line_end` |
 | `/` / `?` | Toggle comments / block comments | `toggle_comments` / `toggle_block_comments` |
@@ -374,10 +374,9 @@ Accessed by typing `v` in [normal mode](#normal-mode).
 
 Select mode echoes Normal mode, but changes any movements to extend
 selections rather than replace them. The word motions (`j`, `l`, `J`, `L`),
-vertical motions (`i`, `k`), the Portal jumps (`<space>g`, `<space>h`, `<space>G`,
-`<space>H`, `<space>w`, `<space>j`, `<space>l`, `<space>u`, `<space>o`, and the
+vertical motions (`i`, `k`), the Portal jumps (`<space>w`, `<space>j`, `<space>l`, `<space>u`, `<space>o`, and the
 regex, fuzzy and bracket jumps), the tree motions `te` and `tb` and the Prev / Next
-motions (`gs`, `gf`, `ga`, `gt`, `gc`, `gp`, `gd`, `gg` and their `h`
+motions (`gs`, `gf`, `ga`, `gt`, `gc`, `gp`, `gd`, `gG`, `gg` and their `h`
 counterparts) extend the selection instead of moving it. Toggling this mode
 before pressing `gs` or `hs` makes it possible to keep the current selection and
 selectively add matches to it.

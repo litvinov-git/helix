@@ -13,8 +13,8 @@
 | `extend_line_down` | Extend down |  |
 | `extend_visual_line_up` | Extend up | select: `` i ``, `` <up> `` |
 | `extend_visual_line_down` | Extend down | select: `` k ``, `` <down> `` |
-| `copy_selection_on_next_line` | Copy selection on next line | normal: `` mc ``, select: `` mc `` |
-| `copy_selection_on_prev_line` | Copy selection on previous line | normal: `` mC ``, select: `` mC `` |
+| `copy_selection_on_next_line` | Copy selection on next line |  |
+| `copy_selection_on_prev_line` | Copy selection on previous line |  |
 | `move_next_word_start` | Move to start of next word | insert: `` <C-right> `` |
 | `move_prev_word_start` | Move to start of previous word | normal: `` j ``, insert: `` <C-left> `` |
 | `move_next_word_end` | Move to end of next word | normal: `` l `` |
@@ -44,13 +44,17 @@
 | `extend_parent_node_end` | Extend to end of the parent node | select: `` te `` |
 | `extend_parent_node_start` | Extend to beginning of the parent node | select: `` tb `` |
 | `find_till_char` | Move till next occurrence of char |  |
-| `find_next_char` | Move to next occurrence of char | normal: `` <space>h `` |
+| `find_next_char` | Move to next occurrence of char |  |
 | `extend_till_char` | Extend till next occurrence of char |  |
-| `extend_next_char` | Extend to next occurrence of char | normal: `` <space>H ``, select: `` <space>H ``, `` <space>h `` |
+| `extend_next_char` | Extend to next occurrence of char |  |
 | `till_prev_char` | Move till previous occurrence of char |  |
-| `find_prev_char` | Move to previous occurrence of char | normal: `` <space>g `` |
+| `find_prev_char` | Move to previous occurrence of char |  |
+| `find_next_char_ignore_case` | Move to next occurrence of char, ignoring case | normal: `` hh `` |
+| `find_prev_char_ignore_case` | Move to previous occurrence of char, ignoring case | normal: `` gg `` |
+| `extend_next_char_ignore_case` | Extend to next occurrence of char, ignoring case | normal: `` Hh ``, select: `` Hh ``, `` hh `` |
+| `extend_prev_char_ignore_case` | Extend to previous occurrence of char, ignoring case | normal: `` Gg ``, select: `` Gg ``, `` gg `` |
 | `extend_till_prev_char` | Extend till previous occurrence of char |  |
-| `extend_prev_char` | Extend to previous occurrence of char | normal: `` <space>G ``, select: `` <space>G ``, `` <space>g `` |
+| `extend_prev_char` | Extend to previous occurrence of char |  |
 | `repeat_last_motion` | Repeat last motion |  |
 | `repeat` | Repeat the last command | normal: `` . ``, select: `` . `` |
 | `replace` | Replace with new char | normal: `` r ``, select: `` r `` |
@@ -63,8 +67,10 @@
 | `half_page_down` | Move half page down |  |
 | `page_cursor_up` | Move page and cursor up |  |
 | `page_cursor_down` | Move page and cursor down |  |
-| `page_cursor_half_up` | Move page and cursor half up | normal: `` I ``, `` <C-u> ``, select: `` I ``, `` <C-u> `` |
-| `page_cursor_half_down` | Move page and cursor half down | normal: `` K ``, `` <C-d> ``, select: `` K ``, `` <C-d> `` |
+| `page_cursor_half_up` | Move page and cursor half up | normal: `` <C-u> ``, select: `` <C-u> `` |
+| `page_cursor_half_up_centered` | Move cursor half a page up and center the view on it | normal: `` I ``, select: `` I `` |
+| `page_cursor_half_down_centered` | Move cursor half a page down and center the view on it | normal: `` K ``, select: `` K `` |
+| `page_cursor_half_down` | Move page and cursor half down | normal: `` <C-d> ``, select: `` <C-d> `` |
 | `select_all` | Select whole document | normal: `` % ``, select: `` % `` |
 | `select_regex` | Select all regex matches inside selections | normal: `` mr ``, select: `` mr `` |
 | `split_selection` | Split selections on regex matches | normal: `` mR ``, select: `` mR `` |
@@ -163,18 +169,18 @@
 | `goto_prev_diag` | Goto previous diagnostic | normal: `` gd `` |
 | `extend_goto_next_diag` | Extend selection to next diagnostic | normal: `` Hd ``, select: `` Hd ``, `` hd `` |
 | `extend_goto_prev_diag` | Extend selection to previous diagnostic | normal: `` Gd ``, select: `` Gd ``, `` gd `` |
-| `goto_next_change` | Goto next change | normal: `` hg `` |
-| `goto_prev_change` | Goto previous change | normal: `` gg `` |
-| `extend_goto_next_change` | Extend selection to next change | normal: `` Hg ``, select: `` Hg ``, `` hg `` |
-| `extend_goto_prev_change` | Extend selection to previous change | normal: `` Gg ``, select: `` Gg ``, `` gg `` |
-| `goto_first_change` | Goto first change | normal: `` gG ``, select: `` gG `` |
-| `goto_last_change` | Goto last change | normal: `` hG ``, select: `` hG `` |
+| `goto_next_change` | Goto next change | normal: `` hG `` |
+| `goto_prev_change` | Goto previous change | normal: `` gG `` |
+| `extend_goto_next_change` | Extend selection to next change | normal: `` HG ``, select: `` HG ``, `` hG `` |
+| `extend_goto_prev_change` | Extend selection to previous change | normal: `` GG ``, select: `` GG ``, `` gG `` |
+| `goto_first_change` | Goto first change | normal: `` gm ``, select: `` gm `` |
+| `goto_last_change` | Goto last change | normal: `` hm ``, select: `` hm `` |
 | `goto_line_start` | Goto line start | normal: `` <home> ``, insert: `` <home> `` |
 | `goto_line_end` | Goto line end | normal: `` <end> ``, `` <space>l `` |
 | `goto_column` | Goto column |  |
 | `extend_to_column` | Extend to column |  |
-| `goto_next_buffer` | Goto next buffer | normal: `` hb ``, select: `` hb `` |
-| `goto_previous_buffer` | Goto previous buffer | normal: `` gb ``, select: `` gb `` |
+| `goto_next_buffer` | Goto next buffer | normal: `` hb ``, `` <space><right> ``, select: `` hb ``, `` <space><right> `` |
+| `goto_previous_buffer` | Goto previous buffer | normal: `` gb ``, `` <space><left> ``, select: `` gb ``, `` <space><left> `` |
 | `goto_line_end_newline` | Goto newline at line end | insert: `` <end> `` |
 | `goto_first_nonwhitespace` | Goto first non-blank in line | normal: `` <space>j `` |
 | `trim_selections` | Trim whitespace from selections | normal: `` mt ``, select: `` mt `` |
@@ -196,8 +202,8 @@
 | `kill_to_line_end` | Delete till end of line | insert: `` <C-k> `` |
 | `undo` | Undo change | normal: `` ge ``, select: `` ge ``, insert: `` <C-z> `` |
 | `redo` | Redo change | normal: `` he ``, select: `` he `` |
-| `earlier` | Move backward in history | normal: `` gh ``, select: `` gh `` |
-| `later` | Move forward in history | normal: `` hh ``, select: `` hh `` |
+| `earlier` | Move backward in history | normal: `` gE ``, select: `` gE `` |
+| `later` | Move forward in history | normal: `` hE ``, select: `` hE `` |
 | `commit_undo_checkpoint` | Commit changes to new checkpoint |  |
 | `yank` | Yank selection | normal: `` y ``, select: `` y `` |
 | `yank_to_clipboard` | Yank selections to clipboard | normal: `` <C-c> ``, select: `` <C-c> ``, insert: `` <C-c> `` |
@@ -277,7 +283,7 @@
 | `scroll_down` | Scroll view down |  |
 | `match_brackets` | Goto matching bracket | normal: `` <space>m ``, select: `` <space>m `` |
 | `surround_add` | Surround add | normal: `` ms ``, select: `` ms `` |
-| `surround_replace` | Surround replace | normal: `` mS ``, select: `` mS `` |
+| `surround_replace` | Surround replace | normal: `` mc ``, select: `` mc `` |
 | `surround_delete` | Surround delete | normal: `` md ``, select: `` md `` |
 | `select_textobject_around` | Select around object | normal: `` ma ``, select: `` ma `` |
 | `select_textobject_inner` | Select inside object | normal: `` mi ``, select: `` mi `` |

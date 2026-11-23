@@ -8,7 +8,7 @@ This is the complete specification of the default normal, select and insert mode
 - **Minor modes.** Almost every binding lives in a small named minor mode opened by a prefix key, so a binding can be guessed without having learned it. Most bindings are exactly two keys, and there are no longer sequences except `wn{s,v}` and the textobject / surround follow-up keys.
 - **Prefix keys never double as commands.** No key sequence is a prefix of another sequence.
 - **Capital letter = broader or alternate.** Within a mode, the capital version of a key extends the selection, acts in a broader context, or is an alternate action: `mr` selects regex matches and `mR` splits on them; `fs` is the document symbol picker and `fS` the workspace one; `gD` / `hD` are first / last diagnostic.
-- **`g` is previous, `h` is next.** Wherever they appear as a pair (the Prev / Next prefixes, the portal character jumps, the `m` rotations) the key on the left of the home row index finger goes back and its neighbour goes forward. `G` / `H` are the same motions extending the selection.
+- **`g` is previous, `h` is next.** Wherever they appear as a pair (the Prev / Next prefixes, the character jumps `gg` / `hh`, the `m` rotations) the key on the left of the home row index finger goes back and its neighbour goes forward. `G` / `H` are the same motions extending the selection.
 - **Regex is always `r` / `R`.**
 - **Fingers.** Keys are preferred on the index, middle and ring fingers over the inner index column and the pinky. Mappings that will almost never be used are not worth a key.
 - **Search results are shared.** `gs` / `hs` navigate the kept fuzzy matches if there are any, otherwise the regex search. This is the behavior of `search_prev` / `search_next` themselves; they walk the fuzzy matches kept by the last fuzzy search until another motion drops them. The `fuzzy_search_next` / `fuzzy_search_prev` family stays unbound.
@@ -18,7 +18,7 @@ This is the complete specification of the default normal, select and insert mode
 | Prefix | Infobox title | Purpose |
 |---|---|---|
 | `f` | Find | pickers and searching |
-| `<space>` | Portal | jump anywhere: search jumps, characters, lines, screen, files |
+| `<space>` | Portal | jump anywhere: search jumps, lines, screen, files, buffers |
 | `g` / `h` | Prev / Next | `g` goes to the previous one, `h` to the next one; each row is a pair |
 | `G` / `H` | Extend Prev / Next | the same motions as `g` / `h`, but the selection is extended by the object instead of the cursor moving |
 | `m` | Match | create and manipulate selections |
@@ -63,8 +63,6 @@ Keys are written as typed (`<space>` is the space bar). Where a row lists severa
 | `<space>r` / `<space>R` | search / rsearch | Regex search forward / backward |
 | `<space>w` | goto_word | Jump to word by label |
 | `<space>m` | match_brackets | Matching bracket |
-| `<space>g` / `<space>h` | find_prev_char / find_next_char | Move to previous / next character |
-| `<space>G` / `<space>H` | extend_prev_char / extend_next_char | Extend selection to previous / next character |
 | `<space>l` | goto_line_end | Line end |
 | `<space>j` | goto_first_nonwhitespace | First non-blank of line |
 | `<space>u` / `<space>o` | goto_file_start / goto_last_line | File start / end |
@@ -73,6 +71,7 @@ Keys are written as typed (`<space>` is the space bar). Where a row lists severa
 | `<space>.` | goto_last_modification | Last modification in the file |
 | `<space>p` | goto_file | Open the file path under the cursor |
 | `<space>n` | goto_line | Go to line number |
+| `<space>left` / `<space>right` | goto_previous_buffer / goto_next_buffer | Previous / next buffer (the arrows after the Portal prefix; `gb` / `hb` do the same) |
 
 Column 0 (`goto_line_start`) has no key apart from `home`.
 
@@ -81,7 +80,8 @@ Column 0 (`goto_line_start`) has no key apart from `home`.
 | Keys | Command | Action |
 |---|---|---|
 | `ge` / `he` | undo / redo | Undo / redo |
-| `gh` / `hh` | earlier / later | Earlier / later in the undo history |
+| `gE` / `hE` | earlier / later | Earlier / later in the undo history |
+| `gg` / `hh` | find_prev_char_ignore_case / find_next_char_ignore_case | Move to the previous / next occurrence of a character, ignoring case (then the character key) |
 | `gs` / `hs` | search_prev / search_next | Previous / next search result (kept fuzzy matches, else regex) |
 | `gd` / `hd` | goto_prev_diag / goto_next_diag | Previous / next diagnostic |
 | `gD` / `hD` | goto_first_diag / goto_last_diag | First / last diagnostic |
@@ -90,8 +90,8 @@ Column 0 (`goto_line_start`) has no key apart from `home`.
 | `gt` / `ht` | goto_prev_class / goto_next_class | Previous / next type or class |
 | `gc` / `hc` | goto_prev_comment / goto_next_comment | Previous / next comment |
 | `gp` / `hp` | goto_prev_paragraph / goto_next_paragraph | Previous / next paragraph |
-| `gg` / `hg` | goto_prev_change / goto_next_change | Previous / next git change |
-| `gG` / `hG` | goto_first_change / goto_last_change | First / last git change |
+| `gG` / `hG` | goto_prev_change / goto_next_change | Previous / next git change |
+| `gm` / `hm` | goto_first_change / goto_last_change | First / last git change (modification) |
 | `gj` / `hj` | jump_backward / jump_forward | Jumplist back / forward |
 | `gb` / `hb` | goto_previous_buffer / goto_next_buffer | Previous / next buffer |
 | `gv` / `hv` | page_up / page_down | Page up / down |
@@ -107,7 +107,8 @@ Column 0 (`goto_line_start`) has no key apart from `home`.
 | `Gc` / `Hc` | extend_goto_prev_comment / extend_goto_next_comment | Extend by previous / next comment |
 | `Gp` / `Hp` | extend_goto_prev_paragraph / extend_goto_next_paragraph | Extend by previous / next paragraph |
 | `Gd` / `Hd` | extend_goto_prev_diag / extend_goto_next_diag | Extend by previous / next diagnostic |
-| `Gg` / `Hg` | extend_goto_prev_change / extend_goto_next_change | Extend by previous / next git change |
+| `GG` / `HG` | extend_goto_prev_change / extend_goto_next_change | Extend by previous / next git change |
+| `Gg` / `Hh` | extend_prev_char_ignore_case / extend_next_char_ignore_case | Extend to the previous / next occurrence of a character, ignoring case |
 
 The plain `g` / `h` motions only move the cursor in normal mode. The `extend_goto_*` commands share their implementation with the plain ones through an `extend: bool` parameter (`goto_ts_object_impl`, `goto_next_diag_impl`, `goto_next_change_impl`, ...).
 
@@ -119,7 +120,6 @@ The plain `g` / `h` motions only move the cursor in normal mode. The `extend_got
 | `mn` | split_selection_on_newline | Split selection on newlines |
 | `mg` / `mh` | rotate_selections_backward / rotate_selections_forward | Rotate the main selection back / forward |
 | `mG` / `mH` | rotate_selection_contents_backward / rotate_selection_contents_forward | Rotate selection contents back / forward |
-| `mc` / `mC` | copy_selection_on_next_line / copy_selection_on_prev_line | Copy selection onto next / previous line |
 | `mf` / `mF` | flip_selections / ensure_selections_forward | Flip cursor and anchor / ensure the selection is forward |
 | `mm` / `mM` | merge_selections / merge_consecutive_selections | Merge selections / merge consecutive selections |
 | `mk` / `mK` | keep_selections / remove_selections | Keep / remove selections matching a regex |
@@ -129,15 +129,15 @@ The plain `g` / `h` motions only move the cursor in normal mode. The `extend_got
 | `m=` | align_selections | Align selections in columns |
 | `mj` / `mJ` | join_selections / join_selections_space | Join lines / join lines with a space |
 | `ma` / `mi` | select_textobject_around / select_textobject_inner | Select around / inside a textobject (then the object key) |
-| `ms` / `mS` / `md` | surround_add / surround_replace / surround_delete | Surround: add / replace / delete |
+| `ms` / `mc` / `md` | surround_add / surround_replace / surround_delete | Surround: add / change (replace) / delete |
 
 ### Symbol (`s`): everything the language server provides, except pickers
 
 | Keys | Command | Action |
 |---|---|---|
-| `sd` / `sD` | goto_definition / goto_declaration | Go to definition / declaration |
+| `sd` / `sD` | goto_definition / goto_declaration | Go to definition (goes to the implementation if there is no definition) / declaration |
 | `st` | goto_type_definition | Go to type definition |
-| `si` | goto_implementation | Go to implementation |
+| `si` | goto_implementation | Go to implementation (goes to the definition if there is no implementation) |
 | `sr` | goto_reference | Go to references |
 | `sh` | hover | Hover documentation |
 | `sc` | rename_symbol | Rename symbol (change) |
@@ -184,7 +184,7 @@ The plain `g` / `h` motions only move the cursor in normal mode. The `extend_got
 | `i` / `k` | move_visual_line_up / move_visual_line_down | Move up / down (visual line) |
 | `j` / `l` | move_prev_word_start / move_next_word_end | Previous word start / next word end |
 | `J` / `L` | move_prev_long_word_start / move_next_long_word_end | Previous WORD start / next WORD end |
-| `I` / `K` | page_cursor_half_up / page_cursor_half_down | Half page up / down (cursor and view) |
+| `I` / `K` | page_cursor_half_up_centered / page_cursor_half_down_centered | Half page up / down, then the cursor line is centered in the view (smooth, fast scrolling: the cursor stays in the middle) |
 | `u` / `U` | insert_mode / insert_at_line_start | Insert before the selection / at line start |
 | `o` / `O` | append_mode / insert_at_line_end | Append after the selection / at line end |
 | `n` / `N` | open_below / open_above | Open a new line below / above |
@@ -206,9 +206,11 @@ The plain `g` / `h` motions only move the cursor in normal mode. The `extend_got
 | `\|` / `!` / `$` | shell_pipe / shell_insert_output / shell_keep_pipe | Shell pipe / insert output / keep where the command succeeds |
 | `:` | command_mode | Command mode |
 
-Other keys kept from upstream: arrow keys (`up` / `down` = visual line motions, `left` / `right` = char motions), `home` / `end`, `pageup` / `C-b` and `pagedown` / `C-f` (page up / down), `C-u` / `C-d` (half page), `C-o` (jump_backward), `C-z` (suspend), `esc` (normal_mode).
+`page_cursor_half_*_centered` run `page_cursor_half_up` / `page_cursor_half_down` (`scroll(.., sync_cursor = true)`, which extends the selection in select mode) and then `align_view_center`. `find_*_char_ignore_case` / `extend_*_char_ignore_case` are the `find_char` family with a case-insensitive comparison.
 
-Unbound on purpose: `a A h H e E w b W B t T f F s S C G X` and `u`/`o` as prefixes (`h` and `G` are prefixes now), the DAP debugger submenu, view scrolling (`scroll_up` / `scroll_down`), `add_newline_above`, `paste_clipboard_before`, `save_selection`, till-character (`find_till_char`, `till_prev_char`), `completion` outside insert mode, the stock `[` / `]` menus and the `C-w` window mode. The fuzzy next / prev family (`fuzzy_search_next`, `fuzzy_search_prev`, `extend_fuzzy_search_next`, `extend_fuzzy_search_prev`) is unbound because `gs` / `hs` / `Gs` / `Hs` already reach it.
+Other keys kept from upstream: arrow keys (`up` / `down` = visual line motions, which do not scroll, `left` / `right` = char motions), `home` / `end`, `pageup` / `C-b` and `pagedown` / `C-f` (page up / down), `C-u` / `C-d` (half page), `C-o` (jump_backward), `C-z` (suspend), `esc` (normal_mode).
+
+Unbound on purpose: `a A h H e E w b W B t T f F s S C G X` and `u`/`o` as prefixes (`h` and `G` are prefixes now), the DAP debugger submenu, view scrolling (`scroll_up` / `scroll_down`), `add_newline_above`, `paste_clipboard_before`, `save_selection`, the case-sensitive character finds (`find_next_char`, `find_prev_char`, `extend_next_char`, `extend_prev_char`), till-character (`find_till_char`, `till_prev_char`), `copy_selection_on_next_line` / `copy_selection_on_prev_line` (`yp` covers it), `completion` outside insert mode, the stock `[` / `]` menus and the `C-w` window mode. The fuzzy next / prev family (`fuzzy_search_next`, `fuzzy_search_prev`, `extend_fuzzy_search_next`, `extend_fuzzy_search_prev`) is unbound because `gs` / `hs` / `Gs` / `Hs` already reach it.
 
 ## Select mode
 
@@ -220,12 +222,12 @@ Select mode is `normal.clone()` plus `merge_nodes` of the overrides below, so ev
 | `left` / `right` | extend_char_left / extend_char_right | Extend by a character |
 | `j` / `l` / `J` / `L` | extend_prev_word_start / extend_next_word_end / extend_prev_long_word_start / extend_next_long_word_end | Extend by word motions |
 | `home` / `end` | extend_to_line_start / extend_to_line_end | Extend to line start / end |
-| `<space>g` / `<space>h` / `<space>G` / `<space>H` | extend_prev_char / extend_next_char / extend_prev_char / extend_next_char | Extend to previous / next character (both cases do the same) |
+| `gg` / `hh` | extend_prev_char_ignore_case / extend_next_char_ignore_case | Extend to previous / next character, ignoring case (same as `Gg` / `Hh`) |
 | `<space>w` | extend_to_word | Extend to a word label |
 | `<space>j` / `<space>l` | extend_to_first_nonwhitespace / extend_to_line_end | Extend to first non-blank / line end |
 | `<space>u` / `<space>o` | extend_to_file_start / extend_to_last_line | Extend to file start / end |
 | `gs` / `hs` | extend_search_prev / extend_search_next | Extend by previous / next search result |
-| `gf` / `hf` `ga` / `ha` `gt` / `ht` `gc` / `hc` `gp` / `hp` `gd` / `hd` `gg` / `hg` | extend_goto_prev_* / extend_goto_next_* | Extend by the object of the motion |
+| `gf` / `hf` `ga` / `ha` `gt` / `ht` `gc` / `hc` `gp` / `hp` `gd` / `hd` `gG` / `hG` | extend_goto_prev_* / extend_goto_next_* | Extend by the object of the motion |
 | `te` / `tb` | extend_parent_node_end / extend_parent_node_start | Extend to the end / start of the parent node |
 | `.` | repeat | Repeat the last command |
 | `v` / `esc` | normal_mode / exit_select_mode | Leave select mode |
@@ -260,7 +262,9 @@ Insert mode keeps the upstream bindings (`esc`, `C-r`, `C-w` / `A-backspace`, `A
 
 - `C-s` no longer saves the selection (`save_selection` is unbound).
 - Yank-main-selection, paste-before and replace-with-clipboard have no Ctrl chord, so they have no key.
-- File start / end on `<space>u` / `<space>o` and the loss of a key for column 0 are picks made to resolve the clash with `<space>g` / `<space>h`.
+- File start / end on `<space>u` / `<space>o` and the loss of a key for column 0 were picks made to resolve a clash with `<space>g` / `<space>h`, which are free now; `<space>g` / `<space>h` could take them back.
+- Git change moved from `gg` / `hg` to `gG` / `hG` (first / last to `gm` / `hm`) and earlier / later from `gh` / `hh` to `gE` / `hE`, to free `gg` / `hh` for the character finds.
+- `I` / `K` recenter after every half page jump; the half page is a guess at the best smooth motion, a smaller step (a quarter page) is a one-line change.
 - Insert mode: `C-right` goes to the next word start; it could follow `l` and go to the word end instead.
 - Insert mode: `move_prev_word_start` / `move_next_word_start` leave the word selected, so typing afterwards replaces it. A variant that only moves the cursor may feel more natural.
 - Insert mode: `paste_clipboard_after` on `C-v` pastes after the cursor character; the before variant may feel better.

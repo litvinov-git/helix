@@ -29,7 +29,7 @@ use helix_view::{
 
 use crate::{
     compositor::{self, Compositor},
-    job::{Callback, Job},
+    job::{Callback, EditorCallbackFollowup, Job},
     ui::{self, overlay::overlaid, FileLocation, Picker, Popup, PromptEvent},
 };
 
@@ -948,7 +948,23 @@ where
     P: Fn(&Client, lsp::Position, lsp::TextDocumentIdentifier) -> Option<F>,
     F: Future<Output = helix_lsp::Result<Option<lsp::GotoDefinitionResponse>>> + 'static + Send,
 {
-    let (view, doc) = current_ref!(cx.editor);
+    let job = goto_single_job(cx.editor, feature, request_provider, None);
+    cx.jobs.add(job);
+}
+
+/// Requests the locations of `feature` for the cursor. When there are none and a `fallback` is
+/// given, the fallback is run instead of reporting an error.
+fn goto_single_job<P, F>(
+    editor: &Editor,
+    feature: LanguageServerFeature,
+    request_provider: P,
+    fallback: Option<EditorCallbackFollowup>,
+) -> Job
+where
+    P: Fn(&Client, lsp::Position, lsp::TextDocumentIdentifier) -> Option<F>,
+    F: Future<Output = helix_lsp::Result<Option<lsp::GotoDefinitionResponse>>> + 'static + Send,
+{
+    let (view, doc) = current_ref!(editor);
     let mut futures: FuturesUnordered<_> = doc
         .language_servers_with_feature(feature)
         .map(|language_server| {
@@ -959,7 +975,7 @@ where
         })
         .collect();
 
-    cx.jobs.callback(async move {
+    Job::with_callback(async move {
         let mut locations = Vec::new();
         while let Some(response) = futures.next().await {
             match response {
@@ -992,6 +1008,11 @@ where
                 Err(err) => log::error!("Error requesting locations: {err}"),
             }
         }
+        if locations.is_empty() {
+            if let Some(fallback) = fallback {
+                return Ok(Callback::Followup(fallback));
+            }
+        }
         let call = move |editor: &mut Editor, compositor: &mut Compositor| {
             if locations.is_empty() {
                 editor.set_error(match feature {
@@ -1006,7 +1027,7 @@ where
             }
         };
         Ok(Callback::EditorCompositor(Box::new(call)))
-    });
+    })
 }
 
 pub fn goto_declaration(cx: &mut Context) {
@@ -1017,12 +1038,23 @@ pub fn goto_declaration(cx: &mut Context) {
     );
 }
 
+/// Goes to the definition, or to the implementation if there is no definition.
 pub fn goto_definition(cx: &mut Context) {
-    goto_single_impl(
-        cx,
+    let fallback: EditorCallbackFollowup = Box::new(|editor| {
+        Some(goto_single_job(
+            editor,
+            LanguageServerFeature::GotoImplementation,
+            |ls, pos, doc_id| ls.goto_implementation(doc_id, pos, None),
+            None,
+        ))
+    });
+    let job = goto_single_job(
+        cx.editor,
         LanguageServerFeature::GotoDefinition,
         |ls, pos, doc_id| ls.goto_definition(doc_id, pos, None),
+        Some(fallback),
     );
+    cx.jobs.add(job);
 }
 
 pub fn goto_type_definition(cx: &mut Context) {
@@ -1033,12 +1065,23 @@ pub fn goto_type_definition(cx: &mut Context) {
     );
 }
 
+/// Goes to the implementation, or to the definition if there is no implementation.
 pub fn goto_implementation(cx: &mut Context) {
-    goto_single_impl(
-        cx,
+    let fallback: EditorCallbackFollowup = Box::new(|editor| {
+        Some(goto_single_job(
+            editor,
+            LanguageServerFeature::GotoDefinition,
+            |ls, pos, doc_id| ls.goto_definition(doc_id, pos, None),
+            None,
+        ))
+    });
+    let job = goto_single_job(
+        cx.editor,
         LanguageServerFeature::GotoImplementation,
         |ls, pos, doc_id| ls.goto_implementation(doc_id, pos, None),
+        Some(fallback),
     );
+    cx.jobs.add(job);
 }
 
 pub fn goto_reference(cx: &mut Context) {

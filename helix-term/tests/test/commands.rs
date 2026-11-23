@@ -33,13 +33,13 @@ async fn search_selection_detect_word_boundaries_at_eof() -> anyhow::Result<()> 
 #[tokio::test(flavor = "multi_thread")]
 async fn test_selection_duplication() -> anyhow::Result<()> {
     // Forward
-    test((
+    test_extra_keys((
         indoc! {"\
             #[lo|]#rem
             ipsum
             dolor
             "},
-        "mcmc",
+        "<A-c><A-c>",
         indoc! {"\
             #(lo|)#rem
             #(ip|)#sum
@@ -49,13 +49,13 @@ async fn test_selection_duplication() -> anyhow::Result<()> {
     .await?;
 
     // Backward
-    test((
+    test_extra_keys((
         indoc! {"\
             #[|lo]#rem
             ipsum
             dolor
             "},
-        "mcmc",
+        "<A-c><A-c>",
         indoc! {"\
             #(|lo)#rem
             #(|ip)#sum
@@ -65,12 +65,12 @@ async fn test_selection_duplication() -> anyhow::Result<()> {
     .await?;
 
     // Copy the selection to previous line, skipping the first line in the file
-    test((
+    test_extra_keys((
         indoc! {"\
             test
             #[testitem|]#
             "},
-        "mC",
+        "<A-C>",
         indoc! {"\
             test
             #[testitem|]#
@@ -79,12 +79,12 @@ async fn test_selection_duplication() -> anyhow::Result<()> {
     .await?;
 
     // Copy the selection to previous line, including the first line in the file
-    test((
+    test_extra_keys((
         indoc! {"\
             test
             #[test|]#
             "},
-        "mC",
+        "<A-C>",
         indoc! {"\
             #[test|]#
             #(test|)#
@@ -93,12 +93,12 @@ async fn test_selection_duplication() -> anyhow::Result<()> {
     .await?;
 
     // Copy the selection to next line, skipping the last line in the file
-    test((
+    test_extra_keys((
         indoc! {"\
             #[testitem|]#
             test
             "},
-        "mc",
+        "<A-c>",
         indoc! {"\
             #[testitem|]#
             test
@@ -107,12 +107,12 @@ async fn test_selection_duplication() -> anyhow::Result<()> {
     .await?;
 
     // Copy the selection to next line, including the last line in the file
-    test((
+    test_extra_keys((
         indoc! {"\
             #[test|]#
             test
             "},
-        "mc",
+        "<A-c>",
         indoc! {"\
             #(test|)#
             #[test|]#
@@ -953,7 +953,7 @@ fn foo() {
 "#;
     test((
         INPUT,
-        ":lang rust<ret>mSm'",
+        ":lang rust<ret>mcm'",
         r#"\
 fn foo() {
     if let Some(_) = None {
@@ -966,7 +966,7 @@ fn foo() {
 
     test((
         INPUT,
-        ":lang rust<ret>3mSm[",
+        ":lang rust<ret>3mcm[",
         r#"\
 fn foo() {
     if let Some(_) = None [
@@ -979,7 +979,7 @@ fn foo() {
 
     test((
         INPUT,
-        ":lang rust<ret>2mSm{",
+        ":lang rust<ret>2mcm{",
         r#"\
 fn foo() {
     if let Some(_) = None {
@@ -1236,7 +1236,7 @@ async fn repeat_command_with_following_keys() -> anyhow::Result<()> {
         indoc! {"\
             #[a|]#bcbcb
             "},
-        "<space>hb.",
+        "hhb.",
         indoc! {"\
             a#[bcb|]#cb
             "},

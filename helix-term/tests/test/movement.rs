@@ -550,11 +550,11 @@ async fn select_mode_tree_sitter_prev_function_goes_backwards_to_object() -> any
 
 #[tokio::test(flavor = "multi_thread")]
 async fn find_char() -> anyhow::Result<()> {
-    test(("he#[l|]#lo\nhello", "<space>hl", "he#[ll|]#o\nhello")).await?;
-    test(("hel#[l|]#o\nhello", "<space>hl", "hel#[lo\nhel|]#lo")).await?;
-    test(("hel#[l|]#o\nhello", "<space>hx", "hel#[l|]#o\nhello")).await?;
-    test(("he#[l|]#lo\nhello", "2<space>hl", "he#[llo\nhel|]#lo")).await?;
-    test(("#[h|]#ello\nhello", "9<space>hl", "#[h|]#ello\nhello")).await?;
+    test(("he#[l|]#lo\nhello", "hhl", "he#[ll|]#o\nhello")).await?;
+    test(("hel#[l|]#o\nhello", "hhl", "hel#[lo\nhel|]#lo")).await?;
+    test(("hel#[l|]#o\nhello", "hhx", "hel#[l|]#o\nhello")).await?;
+    test(("he#[l|]#lo\nhello", "2hhl", "he#[llo\nhel|]#lo")).await?;
+    test(("#[h|]#ello\nhello", "9hhl", "#[h|]#ello\nhello")).await?;
 
     test_extra_keys(("h#[e|]#llo\nhello", "<A-t>l", "h#[el|]#lo\nhello")).await?;
     test_extra_keys(("he#[l|]#lo\nhello", "<A-t>l", "he#[llo\nhe|]#llo")).await?;
@@ -563,11 +563,11 @@ async fn find_char() -> anyhow::Result<()> {
     test_extra_keys(("he#[l|]#lo\nhello", "2<A-t>l", "he#[llo\nhel|]#lo")).await?;
     test_extra_keys(("#[h|]#ello\nhello", "9<A-t>l", "#[h|]#ello\nhello")).await?;
 
-    test(("hello\nhel#[l|]#o", "<space>gl", "hello\nhe#[|ll]#o")).await?;
-    test(("hello\nhe#[l|]#lo", "<space>gl", "hel#[|lo\nhel]#lo")).await?;
-    test(("hello\n#[h|]#ello", "<space>gx", "hello\n#[h|]#ello")).await?;
-    test(("hello\nhel#[l|]#o", "2<space>gl", "hel#[|lo\nhell]#o")).await?;
-    test(("hello\nhell#[o|]#", "9<space>gl", "hello\nhell#[o|]#")).await?;
+    test(("hello\nhel#[l|]#o", "ggl", "hello\nhe#[|ll]#o")).await?;
+    test(("hello\nhe#[l|]#lo", "ggl", "hel#[|lo\nhel]#lo")).await?;
+    test(("hello\n#[h|]#ello", "ggx", "hello\n#[h|]#ello")).await?;
+    test(("hello\nhel#[l|]#o", "2ggl", "hel#[|lo\nhell]#o")).await?;
+    test(("hello\nhell#[o|]#", "9ggl", "hello\nhell#[o|]#")).await?;
 
     test_extra_keys(("hello\nhell#[o|]#", "<A-T>l", "hello\nhel#[|lo]#")).await?;
     test_extra_keys(("hello\nhel#[l|]#o", "<A-T>l", "hell#[|o\nhell]#o")).await?;
@@ -580,13 +580,25 @@ async fn find_char() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn find_char_ignore_case() -> anyhow::Result<()> {
+    test(("#[h|]#ello World", "hhw", "#[hello W|]#orld")).await?;
+    test(("#[h|]#ello World", "hhW", "#[hello W|]#orld")).await?;
+    test(("hello Wor#[l|]#d", "ggH", "#[|hello Worl]#d")).await?;
+    test(("#[h|]#ello World", "2hho", "#[hello Wo|]#rld")).await?;
+    // The extending versions keep the anchor of the selection.
+    test(("#[he|]#llo World", "Hhw", "#[hello W|]#orld")).await?;
+    test(("hello #[Wo|]#rld", "GgH", "#[|hello W]#orld")).await?;
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn find_char_line_ending() -> anyhow::Result<()> {
-    test_extra_keys(("on#[e|]#\ntwo\n", "<space>h<ret>", "on#[e\n|]#two\n")).await?;
-    test_extra_keys(("one#[\n|]#two\n", "<space>h<ret>", "one#[\ntwo\n|]#")).await?;
-    test_extra_keys(("one\n#[t|]#wo\n", "<space>h<ret>", "one\n#[two\n|]#")).await?;
-    test_extra_keys(("one#[\n|]#", "<space>h<ret>", "one#[\n|]#")).await?;
-    test_extra_keys(("#[o|]#ne\ntwo\n", "2<space>h<ret>", "#[one\ntwo\n|]#")).await?;
-    test_extra_keys(("#[o|]#ne\ntwo\n", "9<space>h<ret>", "#[o|]#ne\ntwo\n")).await?;
+    test_extra_keys(("on#[e|]#\ntwo\n", "hh<ret>", "on#[e\n|]#two\n")).await?;
+    test_extra_keys(("one#[\n|]#two\n", "hh<ret>", "one#[\ntwo\n|]#")).await?;
+    test_extra_keys(("one\n#[t|]#wo\n", "hh<ret>", "one\n#[two\n|]#")).await?;
+    test_extra_keys(("one#[\n|]#", "hh<ret>", "one#[\n|]#")).await?;
+    test_extra_keys(("#[o|]#ne\ntwo\n", "2hh<ret>", "#[one\ntwo\n|]#")).await?;
+    test_extra_keys(("#[o|]#ne\ntwo\n", "9hh<ret>", "#[o|]#ne\ntwo\n")).await?;
 
     test_extra_keys(("o#[n|]#e\ntwo\n", "<A-t><ret>", "o#[ne|]#\ntwo\n")).await?;
     test_extra_keys(("on#[e|]#\ntwo\n", "<A-t><ret>", "on#[e\ntwo|]#\n")).await?;
@@ -598,36 +610,26 @@ async fn find_char_line_ending() -> anyhow::Result<()> {
 
     test_extra_keys((
         "one\ntwo\n#[t|]#hree\n",
-        "<space>g<ret>",
+        "gg<ret>",
         "one\ntwo#[|\nt]#hree\n",
     ))
     .await?;
     test_extra_keys((
         "one\ntwo#[\n|]#three\n",
-        "<space>g<ret>",
+        "gg<ret>",
         "one#[|\ntwo\n]#three\n",
     ))
     .await?;
     test_extra_keys((
         "one\ntw#[o|]#\nthree\n",
-        "<space>g<ret>",
+        "gg<ret>",
         "one#[|\ntwo]#\nthree\n",
     ))
     .await?;
-    test_extra_keys(("o#[n|]#e\n", "<space>g<ret>", "o#[n|]#e\n")).await?;
-    test_extra_keys(("#[o|]#ne\n", "<space>g<ret>", "#[o|]#ne\n")).await?;
-    test_extra_keys((
-        "one\ntwo\nth#[r|]#ee\n",
-        "2<space>g\n",
-        "one#[|\ntwo\nthr]#ee\n",
-    ))
-    .await?;
-    test_extra_keys((
-        "one\ntwo\nth#[r|]#ee\n",
-        "9<space>g\n",
-        "one\ntwo\nth#[r|]#ee\n",
-    ))
-    .await?;
+    test_extra_keys(("o#[n|]#e\n", "gg<ret>", "o#[n|]#e\n")).await?;
+    test_extra_keys(("#[o|]#ne\n", "gg<ret>", "#[o|]#ne\n")).await?;
+    test_extra_keys(("one\ntwo\nth#[r|]#ee\n", "2gg\n", "one#[|\ntwo\nthr]#ee\n")).await?;
+    test_extra_keys(("one\ntwo\nth#[r|]#ee\n", "9gg\n", "one\ntwo\nth#[r|]#ee\n")).await?;
 
     test_extra_keys((
         "one\ntwo\nth#[r|]#ee\n",
@@ -669,7 +671,7 @@ async fn find_char_line_ending() -> anyhow::Result<()> {
             #[|t]#wo
             three"
         },
-        "<A-T><ret><space>l<right>2<space>h<ret>",
+        "<A-T><ret><space>l<right>2hh<ret>",
         indoc! {
             "\
             one
@@ -686,7 +688,7 @@ async fn find_char_line_ending() -> anyhow::Result<()> {
             two
             three"
         },
-        "<space>h<ret>2<A-t><ret><space>j<A-T><ret><space>g<ret>",
+        "hh<ret>2<A-t><ret><space>j<A-T><ret>gg<ret>",
         indoc! {
             "\
             one#[|
@@ -707,7 +709,7 @@ async fn repeat_find_char() -> anyhow::Result<()> {
             #[o|]#ne two
             one two"
         },
-        "<space>ht.",
+        "hht.",
         indoc! {
             "\
             one #[two
@@ -723,7 +725,7 @@ async fn repeat_find_char() -> anyhow::Result<()> {
             one two
             "
         },
-        "<space>h<ret>.",
+        "hh<ret>.",
         indoc! {
             "\
             one two#[
@@ -740,7 +742,7 @@ async fn repeat_find_char() -> anyhow::Result<()> {
             one two
             "
         },
-        "<space>ht<space>h<ret>.",
+        "hhthh<ret>.",
         indoc! {
             "\
             one two#[
@@ -759,7 +761,7 @@ async fn test_surround_replace() -> anyhow::Result<()> {
         indoc! {"\
             (#[|a]#)
             "},
-        "mSm{",
+        "mcm{",
         indoc! {"\
             {#[|a]#}
             "},
@@ -770,7 +772,7 @@ async fn test_surround_replace() -> anyhow::Result<()> {
         indoc! {"\
             (#[a|]#)
             "},
-        "mSm{",
+        "mcm{",
         indoc! {"\
             {#[a|]#}
             "},
@@ -784,7 +786,7 @@ async fn test_surround_replace() -> anyhow::Result<()> {
             #(}|)#
             #[}|]#
             "},
-        "mSm)",
+        "mcm)",
         indoc! {"\
             ((
 

@@ -23,7 +23,7 @@ keys are listed below.
 | Completion | automatic while typing; the `completion` command has no default key |
 | Hover documentation | `sh` |
 | Signature help (parameter hints) | automatic while typing arguments |
-| Goto definition / declaration / type / references / implementation | `sd` / `sD` / `st` / `sr` / `si` |
+| Goto definition / declaration / type / references / implementation | `sd` / `sD` / `st` / `sr` / `si` (`sd` goes to the implementation if there is no definition, `si` to the definition if there is no implementation) |
 | Rename symbol | `sc` |
 | Code actions | `sa` |
 | Document / workspace symbols | `fs` / `fS` |
