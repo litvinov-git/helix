@@ -25,19 +25,33 @@ and out of the way.
 
 ## The keymap
 
-The default normal / select / insert keymap is replaced by a minor-mode keymap. The short
-version:
+The default normal / select / insert keymap is replaced by a minor-mode keymap. Its goal is
+to be **intuitive in the sense that you can guess a binding you have never typed**, instead
+of looking it up. It gets there by being a small, consistent *vocabulary* rather than a
+list of unrelated shortcuts:
 
-- `ijkl` are up / left / down / right. There is no Vim compatibility goal.
-- Almost everything lives in a small **named minor mode** opened by a prefix key, so a
-  binding can be guessed instead of memorized. The info box shows the mode's name and keys.
-- Bindings are mostly **two keys**. A prefix key never doubles as a command, and no
-  sequence is a prefix of another.
-- A **capital letter** means extend the selection, a broader context, or an alternate
-  action: `mr` selects regex matches inside the selection, `mR` splits on them; `fs` is the
-  symbol picker, `fS` the workspace one.
-- **`g` is previous, `h` is next** wherever they form a pair, and `G` / `H` are the same
-  motions extending the selection. Regex is always `r` / `R`.
+- **A prefix key is an action family** (the "verb"). It opens a small named **minor mode**
+  and the info box shows its name and keys: `f` Find, `<space>` Portal (jump), `g` / `h`
+  Previous / Next, `G` / `H` Extend, `m` Match (selections), `s` Symbol (language
+  server), `t` Tree, `w` Window.
+- **The key after it is a direction or an object** (the "noun"), and it means the same thing
+  nearly everywhere it appears (there are a few unavoidable exceptions, such as `md`,
+  surround delete):
+  - **Directions:** `g` is previous and `h` is next, wherever they form a pair. `i` / `k`
+    are up / down and `j` / `l` are left / right (`ijkl`, not `hjkl`), also inside `t` and `w`.
+  - **Objects:** `f` is a function, `a` an argument, `t` a type or class, `c` a comment,
+    `p` a paragraph, `d` a diagnostic, `s` a search result, `r` a regex.
+- **A capital letter means extend, a broader context, or an alternate action.**
+
+So you compose instead of memorizing. `gf` is the previous function, `hf` the next one,
+`Gf` extends the selection to the previous function, and `maf` selects around a function.
+`gd` / `hd` walk diagnostics, `fd` opens the diagnostics picker, `fD` the workspace one.
+`<space>r` is a regex jump, `mr` selects regex matches and `mR` splits on them. Learn a
+noun once and it works with most verbs.
+
+Some structure rules keep the vocabulary clean: bindings are mostly **two keys**, a prefix
+key never doubles as a command, and no sequence is a prefix of another, so there is never
+a pause or an ambiguity while typing. There is no Vim compatibility goal.
 
 | Prefix | Mode | Purpose |
 |---|---|---|
